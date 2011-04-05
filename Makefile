@@ -1,6 +1,6 @@
 all: 
 	@echo "\ntargets:\n======="
-	@echo "instant\t\tdownloads and installs glassfish 3, appserver_config and bibimainapp"
+	@echo "instant\t\tdownloads, installs, configures and starts glassfish 3\n\t\t(+appserver_config and bibimainapp)"
 	@echo "restart\t\tkills current glassfish instance, deletes /tmp/bibidomain, creates\n\t\tnew domain and starts it"
 	@echo "update\t\tupdates projects instantbibi, appserver_config and bibimainapp"
 	@echo "clean\t\tdeletes everything including bibimainapp"
