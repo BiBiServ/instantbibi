@@ -64,10 +64,10 @@ base.get:
 	hg clone ssh://hg@hg.cebitec.uni-bielefeld.de/bibiadm/bibiserv2/main/base
 
 base.do:
-	rm -rf /tmp/guugle*; cd base; ant clean-cache; rm -rf lib;ant -Dxml=../codegen/testdata/guugle.bs2 -Dwithout_ws=true -Dwithout_moby=true -Dwithout_vb=true;
+	export TMP_DIR=/tmp; rm -rf /tmp/guugle*; cd base; ant clean-cache; rm -rf lib;ant -Dxml=../codegen/testdata/guugle.bs2 -Dwithout_ws=true -Dwithout_moby=true -Dwithout_vb=true;
 
 update:
-	hg pull; hg update; cd appserver_config; hg pull; hg update; cd ../bibimainapp; hg pull; hg update; cd ../codegen; hg pull; hg update -C JSF2;cd ../base; hg pull; hg update
+	hg pull; hg update; cd appserver_config; hg pull; hg update; cd ../bibimainapp; hg pull; hg update; cd ../codegen; hg pull; hg update -C JSF2; cd ../base; hg pull; hg update
 
 domain.clean:
 	rm -rf /tmp/bibidomain
