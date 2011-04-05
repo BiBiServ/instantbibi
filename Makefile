@@ -5,7 +5,7 @@ all:
 	@echo "restart\t\tkills current glassfish instance, deletes /tmp/bibidomain, creates\n\t\tnew domain and starts it"
 	@echo "tool\t\tinstalls codegen, creates guugle tool and deploys it"
 	@echo "update\t\tupdates projects instantbibi, appserver_config and bibimainapp"
-	@echo "clean\t\tdeletes everything including bibimainapp"
+	@echo "wipeall\t\tdeletes everything including bibimainapp"
 
 instant: domain.clean appserver.kill install
 
@@ -58,7 +58,7 @@ codegen.get:
 	hg clone ssh://hg@hg.cebitec.uni-bielefeld.de/bibiadm/bibiserv2/main/codegen
 
 codegen.do:
-	cd codegen; rm -rf dist; ant dist publish
+	cd codegen; rm -rf dist; hg update -C JSF2; ant dist publish
 
 base.get:
 	hg clone ssh://hg@hg.cebitec.uni-bielefeld.de/bibiadm/bibiserv2/main/base
@@ -67,10 +67,10 @@ base.do:
 	rm -rf /tmp/guugle*; cd base; ant clean-cache; rm -rf lib;ant -Dxml=../codegen/testdata/guugle.bs2 -Dwithout_ws=true -Dwithout_moby=true -Dwithout_vb=true;
 
 update:
-	hg pull; hg update; cd appserver_config; hg pull; hg update; cd ../bibimainapp; hg pull; hg update; cd ../codegen; hg pull; hg update;cd ../base; hg pull; hg update
+	hg pull; hg update; cd appserver_config; hg pull; hg update; cd ../bibimainapp; hg pull; hg update; cd ../codegen; hg pull; hg update -C JSF2;cd ../base; hg pull; hg update
 
 domain.clean:
 	rm -rf /tmp/bibidomain
 
-clean: domain.clean appserver.kill
-	rm -rf glassfish* bibigf31 appserver_config bibimainapp
+wipeall: domain.clean appserver.kill
+	rm -rf glassfish* bibigf31 appserver_config bibimainapp base codegen
