@@ -9,6 +9,7 @@ all:
 
 instant: domain.clean appserver.kill install
 
+instant-dev: instant codegen.get base.get
 install: bibiserv2.manager gf31.get gf31.unzip gf31.rmzip appserver.get appserver.install appserver.createconfigs appserver.run bibimainapp.get bibimainapp.resolve
 
 restart: domain.clean appserver.kill appserver.run
