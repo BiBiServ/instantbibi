@@ -1,9 +1,12 @@
 all: 
 	@echo "\ntargets:\n======="
 	@echo "instant\t\tdownloads, installs, configures and starts glassfish 3\n\t\t(+appserver_config and bibimainapp)"
+	@echo "instant-dev\t\textends instant by fetching base and codegen."
 	@echo "restart\t\tkills current glassfish instance, deletes /tmp/bibidomain, creates\n\t\tnew domain and starts it"
+	@echo "tool\t\tinstalls codegen, creates guugle tool and deploys it"
 	@echo "update\t\tupdates projects instantbibi, appserver_config and bibimainapp"
 	@echo "clean\t\tdeletes everything including bibimainapp"
+
 instant: domain.clean appserver.kill install
 
 install: bibiserv2.manager gf31.get gf31.unzip gf31.rmzip appserver.get appserver.install appserver.createconfigs appserver.run bibimainapp.get bibimainapp.resolve
@@ -44,8 +47,25 @@ bibimainapp.get:
 bibimainapp.resolve:
 	cd bibimainapp; ant resolve
 
+tool: codegen.do base.do guugle.deploy
+
+guugle.deploy:
+	sh scripts/deployGuugle.sh
+
+codegen.get:
+	hg clone ssh://hg@hg.cebitec.uni-bielefeld.de/bibiadm/bibiserv2/main/codegen
+
+codegen.do:
+	cd codegen; rm -rf dist; ant dist publish
+
+base.get:
+	hg clone ssh://hg@hg.cebitec.uni-bielefeld.de/bibiadm/bibiserv2/main/base
+
+base.do:
+	rm -rf /tmp/guugle*; cd base; ant clean-cache; rm -rf lib;ant -Dxml=../codegen/testdata/guugle.bs2 -Dwithout_ws=true -Dwithout_moby=true -Dwithout_vb=true;
+
 update:
-	hg pull; hg update; cd appserver_config; hg pull; hg update; cd ../bibimainapp; hg pull; hg update
+	hg pull; hg update; cd appserver_config; hg pull; hg update; cd ../bibimainapp; hg pull; hg update; cd ../codegen; hg pull; hg update;cd ../base; hg pull; hg update
 
 domain.clean:
 	rm -rf /tmp/bibidomain
