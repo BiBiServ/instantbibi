@@ -16,7 +16,7 @@ instant: domain.clean appserver.kill install deploy
 
 instant-dev: instant codegen.get base.get
 
-install: bibiserv2.manager gf31.get gf31.unzip gf31.rmzip appserver.get appserver.install appserver.createconfigs appserver.run ln.log bibimainapp.get bibimainapp.resolve 
+install: bibiserv2.manager gf31.get gf31.unzip gf31.rmzip appserver.get appserver.install appserver.createconfigs appserver.run ln.log bibimainapp.get bibimainapp.resolve
 
 ln.log:
 	ln -s /tmp/bibidomain/logs logs
@@ -26,32 +26,32 @@ start: restart
 restart: domain.clean appserver.kill appserver.run
 
 bibiserv2.manager:
-	@echo "role=testadmin\npassword=simplepassword\nport=8080\nserver=localhost" > ~/.bibiserv2_manager
+	echo "role=testadmin\npassword=simplepassword\nport=8080\nserver=localhost" > ~/.bibiserv2_manager
 
 gf31.get:
-	@wget http://download.java.net/glassfish/3.1/release/glassfish-3.1.zip
+	wget http://download.java.net/glassfish/3.1/release/glassfish-3.1.zip
 
 gf31.rmzip:
-	@rm glassfish-3.1.zip
+	rm glassfish-3.1.zip
 
 gf31.unzip:
-	@unzip glassfish-3.1.zip;@mv glassfish3 bibigf31
+	unzip glassfish-3.1.zip;mv glassfish3 bibigf31
 
 appserver.get:
-	@hg clone ssh://hg@hg.cebitec.uni-bielefeld.de/bibiadm/bibiserv2/main/appserver_config > /dev/null
+	hg clone ssh://hg@hg.cebitec.uni-bielefeld.de/bibiadm/bibiserv2/main/appserver_config
 
 appserver.install:
-	@cd appserver_config;hg update -C GF3 > /dev/null
+	cd appserver_config;hg update -C GF3;
 
 appserver.createconfigs:
-	@echo "catalina.home=`pwd`/bibigf31\ndomain.dir=/tmp\ndomain=bibidomain\nadmin.user=admin\nspool.dir=/tmp/spool\nexecutable.dir=/vol/biotools\nserver.portbase=8000\ndb.port=8027\nadmin.port=8048" > appserver_config/local.configuration
-	@echo "AS_ADMIN_PASSWORD=admin\nAS_ADMIN_MASTERPASSWORD=changeit" > appserver_config/local.passwordfile
+	echo "catalina.home=`pwd`/bibigf31\ndomain.dir=/tmp\ndomain=bibidomain\nadmin.user=admin\nspool.dir=/tmp/spool\nexecutable.dir=/vol/biotools\nserver.portbase=8000\ndb.port=8027\nadmin.port=8048" > appserver_config/local.configuration
+	echo "AS_ADMIN_PASSWORD=admin\nAS_ADMIN_MASTERPASSWORD=changeit" > appserver_config/local.passwordfile
 
 appserver.run:
-	@cd appserver_config; @ant configure start > /dev/null
+	cd appserver_config; ant configure start
 
 appserver.kill:
-	@sh scripts/kill_bibiserv.sh > /dev/null
+	sh scripts/kill_bibiserv.sh
 
 bibimainapp.get:
 	hg clone ssh://hg@hg.cebitec.uni-bielefeld.de/bibiadm/bibiserv2/main/bibimainapp
