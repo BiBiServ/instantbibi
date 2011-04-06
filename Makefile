@@ -13,16 +13,16 @@ help:
 	@echo "wipeall      : deletes really _EVERYTHING_"
 	@echo "help         : this help"
 
-instant: domain.clean appserver.kill install deploy
+instant: domain.wipe appserver.kill install deploy
 
-install: bibiserv2.manager codegen.get base.get gf31.get gf31.unzip gf31.rmzip appserver.get appserver.install appserver.update appserver.run ln.log bibimainapp.get bibimainapp.resolve
+install: bibiserv2.manager codegen.get base.get gf31.get gf31.unzip gf31.rmzip appserver.get appserver.createconfigs bibimainapp.get update appserver.run ln.log
 
 ln.log:
 	@ln -s /tmp/bibidomain/logs logs
 
 start: restart
 
-restart: domain.clean appserver.kill appserver.run
+restart: domain.wipe appserver.kill appserver.run
 
 bibiserv2.manager:
 	@echo "role=testadmin\npassword=simplepassword\nport=8080\nserver=localhost" > ~/.bibiserv2_manager
@@ -109,10 +109,12 @@ base.clean:
 	@echo "#BASE: Cleaning"
 	@cd base; ant clean-all clean-cache -q
 
+update: this.update appserver.update bibimainapp.update codegen.update base.update
+
 this.update:
 	@echo "#UPDATE: instantbibi";hg pull -u -q; 
 appserver.update:
-	@echo "#APPSERVER_CONFIG: Updating";cd appserver_config;hg update -C GF3 -q;
+	@echo "#UPDATE: appserver_config";cd appserver_config;hg update -C GF3 -q;
 bibimainapp.update:
 	@echo "#UPDATE: bibimainapp"; cd bibimainapp; hg pull -u -q;
 codegen.update:
@@ -120,11 +122,11 @@ codegen.update:
 base.update:
 	@echo "#UPDATE: base";cd base; hg pull -u -q;
 
-domain.clean:
+domain.wipe:
 	@echo "#DOMAIN: Deleting";rm -rf /tmp/bibidomain
 
 clean: base.clean appserver.clean codegen.clean bibimainapp.clean
 
-wipeall: domain.clean appserver.kill
+wipeall: domain.wipe appserver.kill
 	@echo "#WIPE"
 	@rm -rf glassfish* bibigf31 appserver_config bibimainapp base codegen logs
