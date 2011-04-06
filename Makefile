@@ -15,7 +15,7 @@ help:
 
 instant: domain.wipe appserver.kill install deploy
 
-install: bibiserv2.manager codegen.get base.get gf31.get gf31.unzip gf31.rmzip appserver.get appserver.createconfigs bibimainapp.get update appserver.run ln.log
+install: bibiserv2.manager codegen.get base.get gf31.rmzip gf31.get gf31.unzip gf31.rmzip appserver.get appserver.createconfigs bibimainapp.get update appserver.run ln.log
 
 ln.log:
 	@ln -s /tmp/bibidomain/logs logs
