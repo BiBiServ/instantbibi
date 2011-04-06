@@ -8,6 +8,7 @@ help:
 	@echo "restart      : kills current glassfish instance, deletes old, creates & starts new domain"
 	@echo "deploy       : deploys bibimainapp, glassfish has to be running"
 	@echo "start        : see restart"
+	@echo "this.update  : updates only instantbibi"
 	@echo "update       : updates all projects including instantbibi"
 	@echo "clean        : cleans all projects"
 	@echo "wipeall      : deletes really _EVERYTHING_"
