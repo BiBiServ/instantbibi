@@ -14,9 +14,13 @@ help:
 	@echo "wipeall      : deletes really _EVERYTHING_"
 	@echo "help         : this help"
 
-instant: domain.wipe appserver.kill install deploy
+instant: domain.wipe appserver.kill download install deploy
 
-install: bibiserv2.manager codegen.get base.get gf31.rmzip gf31.get gf31.unzip gf31.rmzip appserver.get appserver.createconfigs bibimainapp.get update appserver.run ln.log
+install: bibiserv2.manager gf31.rmzip gf31.get gf31.unzip gf31.rmzip appserver.createconfigs  update appserver.run ln.log
+
+download: codegen.get base.get appserver.get bibimainapp.get
+
+download-bibimainapp: codegen.get base.get appserver.get
 
 ln.log:
 	@ln -s /tmp/bibidomain/logs logs
@@ -34,7 +38,7 @@ gf31.get:
 
 gf31.rmzip:
 	@echo "#GLASSFISH: Removing zip"
-	@rm glassfish-3.1.zip
+	@rm -rf glassfish-3.1.zip
 
 gf31.unzip:
 	@echo "#GLASSFISH: Installing"
@@ -104,7 +108,7 @@ base.get:
 
 base.do:
 	@echo "#BASE: Generating guugle tool"
-	@export TMP_DIR=/tmp; rm -rf /tmp/guugle*; cd base; ant clean-cache; rm -rf lib;ant -Dxml=../codegen/testdata/guugle.bs2 -Dwithout_ws=true -Dwithout_moby=true -Dwithout_vb=true;
+	@export TMP_DIR=/tmp; rm -rf /tmp/guugle*; cd base; ant clean-cache; rm -rf lib;ant -Dxml=../codegen/testdata/guugle.bs2 -Dwithout_ws=true -Dwithout_moby=true -Dwithout_vb=true -Dwithout_sswap=true;
 
 base.clean:
 	@echo "#BASE: Cleaning"
