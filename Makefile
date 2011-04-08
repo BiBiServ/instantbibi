@@ -94,7 +94,7 @@ codegen.get:
 	@echo "#CODEGEN: Cloning"
 	@hg clone ssh://hg@hg.cebitec.uni-bielefeld.de/bibiadm/bibiserv2/main/codegen
 
-codegen.do: codegen.clean codegen.update
+codegen.do: codegen.clean
 	@echo "#CODEGEN: Installation into local ivy repository"
 	@cd codegen; ant dist publish -q
 
