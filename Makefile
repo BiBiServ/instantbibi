@@ -35,10 +35,18 @@ help:
 	@echo "this.update  : updates only instantbibi"
 	@echo "update       : updates all projects including instantbibi"
 	@echo "clean        : cleans all projects"
+	@echo "ivy.cache    : caches ivy-rep to ~/ivy-rep"
+	@echo "ivy.wipe     : deletes ~/ivy-rep"
 	@echo "wipeall      : deletes really _EVERYTHING_"
 	@echo "help         : this help"
 
 instant: domain.wipe appserver.kill download install deploy
+
+ivy.wipe:
+		rm -rf ~/ivy-rep;
+
+ivy.cache: ivy.wipe
+		mkdir ~/ivy-rep; cd /tmp; wget -q -np -r http://bibiserv.techfak.uni-bielefeld.de/ivy-rep/; mv bibiserv.techfak.uni-bielefeld.de/ivy-rep/* ~/ivy-rep; rm -rf /tmp/bibiserv.techfak.uni-bielefeld.de;
 
 install: bibiserv2.manager gf31.rmzip gf31.get gf31.unzip gf31.rmzip appserver.createconfigs  update appserver.run ln.log
 
