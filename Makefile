@@ -62,7 +62,7 @@ start: restart
 restart: domain.wipe appserver.kill appserver.run
 
 bibiserv2.manager:
-	@echo "role=testadmin\npassword=simplepassword\nport=8080\nserver=localhost" > ~/.bibiserv2_manager
+	@echo -e "role=testadmin\npassword=simplepassword\nport=8080\nserver=localhost" > $(HOME)/.bibiserv2_manager
 
 gf31.get:
 	@echo "#GLASSFISH: Fishing"
