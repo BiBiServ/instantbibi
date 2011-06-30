@@ -170,7 +170,7 @@ appserver.update:
 bibimainapp.update:
 	@echo "#UPDATE: bibimainapp"; cd bibimainapp; hg pull -u -q;
 codegen.update:
-	@echo "#UPDATE: codegen"; cd codegen; hg pull -q; hg update -C JSF2 -q;
+	@echo "#UPDATE: codegen"; cd codegen; hg pull -q; hg update -q;
 base.update:
 	@echo "#UPDATE: base";cd base; hg pull -u -q;
 
