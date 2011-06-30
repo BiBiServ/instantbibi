@@ -9,7 +9,7 @@ else
 fi;
 
 
-for i in `$PS | grep $USER | grep bibigf31 | grep -v grep | awk '{print $2}'`
+for i in `$PS | grep $USER | grep bibigf | grep -v grep | awk '{print $2}'`
 	do
 		kill -9 $i
 		echo "killed $i"
