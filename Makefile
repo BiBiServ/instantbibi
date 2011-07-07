@@ -154,7 +154,7 @@ base.get:
 	@hg clone ssh://hg@hg.cebitec.uni-bielefeld.de/bibiadm/bibiserv2/main/base
 
 base.do:
-	@echo "#BASE: Generating guugle tool
+	@echo "#BASE: Generating guugle tool"
 	@TMP_DIR=${TMPDIR};export TMP_DIR; rm -rf /${TMPDIR}/guugle*; cd base; ant clean-cache; rm -rf lib;ant -Dxml=../codegen/testdata/guugle.bs2 -Dwithout_ws=false -Dwithout_moby=true -Dwithout_vb=true -Dwithout_sswap=false;
 
 base.clean:
