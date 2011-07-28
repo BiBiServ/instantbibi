@@ -133,7 +133,7 @@ deploy: bibimainapp.run
 
 tool: guugle
 
-guugle: codegen.do google.do guugle.deploy
+guugle: codegen.do guugle.do guugle.deploy
 
 dialign: codegen.do dialign.do dialign.deploy
 
