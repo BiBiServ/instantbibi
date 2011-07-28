@@ -1,7 +1,7 @@
 ###
 #DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 #
-#Copyright 2010 BiBiServ Curator Team, http://bibiserv.cebitec.uni-bielefeld.de,
+#Copyright 2011 BiBiServ Curator Team, http://bibiserv.cebitec.uni-bielefeld.de,
 #All rights reserved.
 #
 #The contents of this file are subject to the terms of the Common
@@ -15,11 +15,11 @@
 #below the License Header, with the fields enclosed by brackets [] replaced
 # by your own identifying information:
 #
-#"Portions Copyrighted [year] [name of copyright owner]"
+#"Portions Copyrighted 2011 BiBiServ Curator Team, http://bibiserv.cebitec.uni-bielefeld.de"
 #
 #Contributor(s):
 #
-#Author: Armin Töpfer, atoepfer(at)techfak.uni-bielefeld.de
+#Author: Armin Toepfer, atoepfer(at)techfak.uni-bielefeld.de
 ##
 
 
@@ -33,7 +33,9 @@ help:
 	@echo "\ntargets:\n======="
 	@echo "instant      : fetches bibimainapp, appserver_config, base & codegen"
 	@echo "             : downloads, installs, configures and starts glassfish 3 + deploys bibimainapp\n"
-	@echo "tool         : installs codegen, creates guugle tool and deploys it"
+	@echo "tool         : see guugle";
+	@echo "guugle       : installs codegen, creates guugle tool and deploys it (single function tool)"
+	@echo "dialign      : installs codegen, creates dialign tool and deploys it (multiple function tool)"
 	@echo "restart      : kills current glassfish instance, deletes old, creates & starts new domain"
 	@echo "deploy       : deploys bibimainapp, glassfish has to be running"
 	@echo "start        : see restart"
@@ -117,7 +119,7 @@ bibimainapp.get:
 
 bibimainapp.dist:
 	@echo "#BIBIMAINAPP: Compiling"
-	@cd bibimainapp; ant clean-all dist
+	@cd bibimainapp; ant clean dist
 
 bibimainapp.run: bibimainapp.dist
 	@echo "#BIBIMAINAPP: Deploying"
@@ -129,13 +131,19 @@ bibimainapp.clean:
 
 deploy: bibimainapp.run
 
+tool: guugle
 
-tool: codegen.do base.do guugle.deploy
+guugle: codegen.do google.do guugle.deploy
+
+dialign: codegen.do dialign.do dialign.deploy
 
 guugle.deploy:
 	@echo "#TOOL: Deploying"
 	@cd ${TMPDIR}/guugle_*; touch resources/downloads/guugle-1.1.src.tar.gz; ant deploy
-	#@sh .scripts/deployGuugle.sh 
+	
+dialign.deploy:
+	@echo "#TOOL: Deploying"
+	@cd ${TMPDIR}/dialign_*; touch resources/downloads/dialign-2.2.1-src.tar.gz; touch resources/downloads/dialign-2.2.1-solaris.x86.v10.tar.gz; touch resources/downloads/dialign-2.2.1-solaris.sparc.v8.tar.gz; touch resources/downloads/dialign-2.2.1-win32.tar.gz; touch resources/downloads/dialign-2.2.1-universal-osx.dmg.zip; ant deploy
 
 codegen.get:
 	@echo "#CODEGEN: Cloning"
@@ -153,9 +161,13 @@ base.get:
 	@echo "#BASE: Cloning"
 	@hg clone ssh://hg@hg.cebitec.uni-bielefeld.de/bibiadm/bibiserv2/main/base
 
-base.do:
+guugle.do:
 	@echo "#BASE: Generating guugle tool"
-	@TMP_DIR=${TMPDIR};export TMP_DIR; rm -rf /${TMPDIR}/guugle*; cd base; ant clean-cache; rm -rf lib;ant -Dxml=../codegen/testdata/guugle.bs2 -Dwithout_ws=false -Dwithout_moby=true -Dwithout_vb=true -Dwithout_sswap=false;
+	@TMP_DIR=${TMPDIR};export TMP_DIR; rm -rf /${TMPDIR}/guugle*; cd base; ant clean-cache; rm -rf lib;ant -Dxml=../codegen/testdata/guugle.bs2 
+
+dialign.do:
+	@echo "#BASE: Generating dialign tool"
+	@TMP_DIR=${TMPDIR};export TMP_DIR; rm -rf /${TMPDIR}/guugle*; cd base; ant clean-cache; rm -rf lib;ant -Dxml=../codegen/testdata/dialign.bs2
 
 base.clean:
 	@echo "#BASE: Cleaning"
