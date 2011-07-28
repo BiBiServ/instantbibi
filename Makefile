@@ -167,7 +167,7 @@ guugle.do:
 
 dialign.do:
 	@echo "#BASE: Generating dialign tool"
-	@TMP_DIR=${TMPDIR};export TMP_DIR; rm -rf /${TMPDIR}/guugle*; cd base; ant clean-cache; rm -rf lib;ant -Dxml=../codegen/testdata/dialign.bs2
+	@TMP_DIR=${TMPDIR};export TMP_DIR; rm -rf /${TMPDIR}/dialign*; cd base; ant clean-cache; rm -rf lib;ant -Dxml=../codegen/testdata/dialign.bs2
 
 base.clean:
 	@echo "#BASE: Cleaning"
