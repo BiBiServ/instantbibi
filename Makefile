@@ -36,7 +36,8 @@ help:
 	@echo "tool         : see guugle";
 	@echo "guugle       : installs codegen, creates guugle tool and deploys it (single function tool)"
 	@echo "dialign      : installs codegen, creates dialign tool and deploys it (multiple function tool)"
-	@echo "restart      : kills current glassfish instance, deletes old, creates & starts new domain"
+	@echo "restart      : stop glassfish instance, clean database, start glassfish"
+	@echo "restart.wipe : kills current glassfish instance, deletes old, creates & starts new domain"
 	@echo "deploy       : deploys bibimainapp, glassfish has to be running"
 	@echo "start        : see restart"
 	@echo "stop         : kill current glassfish instance, remove domain"
@@ -67,7 +68,10 @@ ln.log:
 
 start: restart
 
-restart:  stop appserver.run
+restart:
+	@cd appserver_config; ant stop clean-db start
+
+restart.wipe: stop appserver.run
 
 stop : appserver.kill domain.wipe
 
