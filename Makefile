@@ -69,7 +69,7 @@ ln.log:
 start: restart
 
 restart:
-	@cd appserver_config; ant stop clean-db start
+	@cd appserver_config; ant stop start
 
 restart.wipe: stop appserver.run
 
