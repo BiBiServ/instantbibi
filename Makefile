@@ -88,11 +88,11 @@ gf31.get:
 
 gf31.rmzip:
 	@echo "#GLASSFISH: Removing zip"
-	@rm -rf glassfish-3.1.zip
+	@rm -rf glassfish-3.1.1.zip
 
 gf31.unzip:
 	@echo "#GLASSFISH: Installing"
-	@unzip glassfish-3.1.zip;mv glassfish3 bibigf31
+	@unzip glassfish-3.1.1.zip;mv glassfish3 bibigf31
 
 appserver.get:
 	@echo "#APPSERVER_CONFIG: Cloning"
