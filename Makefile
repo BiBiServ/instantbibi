@@ -17,14 +17,16 @@
 #
 #"Portions Copyrighted 2011 BiBiServ Curator Team, http://bibiserv.cebitec.uni-bielefeld.de"
 #
-#Contributor(s):
+#Contributor(s): Jan Krueger
 #
-#Author: Armin Toepfer, atoepfer(at)techfak.uni-bielefeld.de
+#Authors: Armin Toepfer, atoepfer(at)techfak.uni-bielefeld.de
+#         Jan Krueger, jkrueger(at)cebitec.uni-bielefeld.de
 ##
 
 
 TMPDIR=/tmp/${USER}
 DOMAINDIR=${TMPDIR}
+ANTARGS=-lib `pwd`/.ant/lib
 
 
 all: help
@@ -48,6 +50,7 @@ help:
 	@echo "ivy.wipe     : deletes ~/ivy-rep"
 	@echo "wipeall      : deletes really _EVERYTHING_"
 	@echo "help         : this help"
+	@echo "inst.antopt  : install ant  optional libaries to local ant lib dir (${HOME}/.ant/lib)" 
 
 instant: domain.wipe appserver.kill download install deploy
 
@@ -59,7 +62,7 @@ ivy.cache: ivy.wipe
 
 install: bibiserv2.manager gf31.rmzip gf31.get gf31.unzip gf31.rmzip appserver.createconfigs  update appserver.run ln.log
 
-download: codegen.get base.get appserver.get bibimainapp.get
+download: codegen.get base.get appserver.get bibimainapp.get resources.get
 
 download-bibimainapp: codegen.get base.get appserver.get
 
@@ -69,7 +72,7 @@ ln.log:
 start: restart
 
 restart:
-	@cd appserver_config; ant stop start
+	@cd appserver_config; ant ${ANTARGS} stop start
 
 restart.wipe: stop appserver.run
 
@@ -78,6 +81,7 @@ stop : appserver.kill domain.wipe
 test:
 	@echo ${TMPDIR}
 	@echo ${DOMAINDIR}
+	@echo ${ANTARGS}
 
 bibiserv2.manager:
 	@echo "role=testadmin\npassword=simplepassword\nport=8080\nserver=localhost" > $(HOME)/.bibiserv2_manager
@@ -107,7 +111,7 @@ appserver.run:
 	@echo "#GLASSFISH: Configuring and startup"
 	@mkdir -p ${TMPDIR}
 	@mkdir -p ${DOMAINDIR}
-	@cd appserver_config; ant configure start
+	@bash -c "cd appserver_config; ant ${ANTARGS} configure start"
 
 appserver.kill:
 	@echo "#GLASSFISH: Killing"
@@ -115,7 +119,7 @@ appserver.kill:
 
 appserver.clean:
 	@echo "#APPSERVER_CONFIG: Cleaning"
-	@cd base; rm -rf lib; ant clean-cache -q
+	@bash -c "cd base; rm -rf lib; ant ${ANTARGS} clean-cache -q"
 
 bibimainapp.get:
 	@echo "#BIBIMAINAPP: Cloning"
@@ -123,7 +127,7 @@ bibimainapp.get:
 
 bibimainapp.dist:
 	@echo "#BIBIMAINAPP: Compiling"
-	@cd bibimainapp; ant clean dist
+	@bash -c "cd bibimainapp; ant ${ANTARGS} clean dist"
 
 bibimainapp.run: bibimainapp.dist
 	@echo "#BIBIMAINAPP: Deploying"
@@ -131,9 +135,13 @@ bibimainapp.run: bibimainapp.dist
 
 bibimainapp.clean:
 	@echo "#BIBIMAINAPP: Cleaning"
-	@cd bibimainapp; ant clean-all clean-cache -q
+	@bash -c "cd bibimainapp; ant ${ANTARGS} clean-all clean-cache -q"
 
 deploy: bibimainapp.run
+
+resources.get:
+	@echo "#INSTANTBIBI: clone resources"
+	@hg clone ssh://hg@hg/bibiadm/bibiserv2/main/tools/instantbibi_resources
 
 tool: guugle
 
@@ -141,13 +149,16 @@ guugle: codegen.do guugle.do guugle.deploy
 
 dialign: codegen.do dialign.do dialign.deploy
 
-guugle.deploy:
-	@echo "#TOOL: Deploying"
-	@cd ${TMPDIR}/guugle_*; touch resources/downloads/guugle-1.1.src.tar.gz; ant deploy
+guugle.deploy: 
+	@echo "#TOOL: Deploying guugle"
 	
-dialign.deploy:
-	@echo "#TOOL: Deploying"
-	@cd ${TMPDIR}/dialign_*; touch resources/downloads/dialign-2.2.1-src.tar.gz; touch resources/downloads/dialign-2.2.1-solaris.x86.v10.tar.gz; touch resources/downloads/dialign-2.2.1-solaris.sparc.v8.tar.gz; touch resources/downloads/dialign-2.2.1-win32.tar.gz; touch resources/downloads/dialign-2.2.1-universal-osx.dmg.zip; ant deploy
+	@bash -c "cp instantbibi_resources/src/guugle-1.2.src.tar.gz ${TMPDIR}/`ls ${TMPDIR} | grep guugle`/resources/downloads/guugle-1.2.src.tar.gz"
+	@bash -c "cd ${TMPDIR}/guugle*; ant ${ANTARGS} deploy"
+	
+dialign.deploy: 
+	@echo "#TOOL: Deploying dialign"
+	bash -c "cp instantbibi_resources/src/dialign-2.2.1-src.tar.gz ${TMPDIR}/`ls ${TMPDIR} | grep dialign`/resources/downloads/dialign-2.2.1-src.tar.gz"
+	@bash -c "cd ${TMPDIR}/dialign_*; ant ${ANTARGS} deploy"
 
 codegen.get:
 	@echo "#CODEGEN: Cloning"
@@ -155,11 +166,11 @@ codegen.get:
 
 codegen.do: codegen.clean
 	@echo "#CODEGEN: Installation into local ivy repository"
-	@cd codegen; ant dist publish -q
+	@bash -c "cd codegen; ant ${ANTARGS} dist publish -q"
 
 codegen.clean:
 	@echo "#CODEGEN: Cleaning"
-	@cd codegen; ant clean-all clean-cache -q
+	@bash -c "cd codegen; ant ${ANTARGS} clean-all clean-cache -q"
 
 base.get:
 	@echo "#BASE: Cloning"
@@ -167,15 +178,15 @@ base.get:
 
 guugle.do:
 	@echo "#BASE: Generating guugle tool"
-	@TMP_DIR=${TMPDIR};export TMP_DIR; rm -rf /${TMPDIR}/guugle*; cd base; ant clean-cache; rm -rf lib;ant -Dxml=../codegen/testdata/guugle.bs2 
+	@bash -c "TMP_DIR=${TMPDIR};export TMP_DIR; rm -rf /${TMPDIR}/guugle*; cd base; ant ${ANTARGS} clean-cache; rm -rf lib;ant ${ANTARGS} -Dxml=../codegen/testdata/guugle.bs2 "
 
 dialign.do:
 	@echo "#BASE: Generating dialign tool"
-	@TMP_DIR=${TMPDIR};export TMP_DIR; rm -rf /${TMPDIR}/dialign*; cd base; ant clean-cache; rm -rf lib;ant -Dxml=../codegen/testdata/dialign.bs2
+	@bash -c "TMP_DIR=${TMPDIR};export TMP_DIR; rm -rf /${TMPDIR}/dialign*; cd base; ant ${ANTARGS} clean-cache; rm -rf lib;ant ${ANTARGS} -Dxml=../codegen/testdata/dialign.bs2"
 
 base.clean:
 	@echo "#BASE: Cleaning"
-	@cd base; ant clean-all clean-cache -q
+	@bash -c "cd base; ant ${ANTARGS} clean-all clean-cache -q"
 
 update: this.update appserver.update bibimainapp.update codegen.update base.update
 
@@ -198,3 +209,8 @@ clean: base.clean appserver.clean codegen.clean bibimainapp.clean
 wipeall: domain.wipe appserver.kill
 	@echo "#WIPE"
 	@rm -rf glassfish* bibigf31 appserver_config bibimainapp base codegen logs
+
+inst.antopt:
+	@echo "#INSTALL ant ${ANTARGS} optional libs to ${HOME}/.ant/lib"
+	@mkdir -p ${HOME}/.ant/lib
+	@cp .ant/lib/*.jar ${HOME}/.ant/lib

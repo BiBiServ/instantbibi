@@ -1,0 +1,28 @@
+InstantBiBi is a configuration tool to set up a complete BiBiServ(2) 
+environment.
+
+
+Idea for this configuration and initial release was initiated by Armin Toepfer 
+(Thanks Armin for the good work).
+
+The configuration should be run on any unix like system, prerequisites are a
+bash, gnu make, java >= 1.6, ant >= 1.7. Running 'make' return a couple of
+(more or less) well described targets.
+
+All BiBiServ2 projects ant build files make heavily use of some ant extensions, 
+located in .ant/lib subdirectory. These ant extension used by the Makefile are
+set through an environment variable ($ANT_ARGS).
+
+If you want do more than just test the BiBiServ - develop/extend a tool for the BiBiServ2 -
+we suggest to copy these ant extensions to your local ant lib extention folder (which is
+normally $HOME/.ant/lib).
+
+These configuration script was tested on :
+Solaris X64
+Linux X86 (Ubuntu 10.04)
+Linux X64 (Ubuntu 11.10)
+OSX 10.6 (running jdk 6)
+OSX 10.7 (running jdk 7)
+
+The BiBiServ Team - 11/09/2011
+
