@@ -21,7 +21,7 @@ if [ `uname` == "SunOS" ]; then
 	arch="solaris_x64";
 fi;
 
-if [ `uname`=="Darwin" ]; then
+if [ `uname` == "Darwin" ]; then
 	arch="osx";
 fi;
 
