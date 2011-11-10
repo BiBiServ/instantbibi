@@ -104,7 +104,7 @@ appserver.get:
 
 appserver.createconfigs:
 	@echo "#APPSERVER_CONFIG: Creating configs"
-	@echo "catalina.home=`pwd`/bibigf31\ndomain.dir=${DOMAINDIR}\ndomain=bibidomain\nadmin.user=admin\nspool.dir=${TMPDIR}/spool\nexecutable.dir=${DOMAINDIR}/bin\nserver.portbase=8000\ndb.port=8027\nadmin.port=8048" > appserver_config/local.configuration
+	@echo "catalina.home=`pwd`/bibigf31\ndomain.dir=${DOMAINDIR}\ndomain=bibidomain\nadmin.user=admin\nspool.dir=${TMPDIR}/spool\nexecutable.dir=${DOMAINDIR}/bibidomain/bin\nserver.portbase=8000\ndb.port=8027\nadmin.port=8048" > appserver_config/local.configuration
 	@echo "AS_ADMIN_PASSWORD=admin\nAS_ADMIN_MASTERPASSWORD=changeit" > appserver_config/local.passwordfile
 
 appserver.run:
@@ -141,7 +141,7 @@ deploy: bibimainapp.run
 
 resources.get:
 	@echo "#INSTANTBIBI: clone resources"
-	@hg clone ssh://hg@hg/bibiadm/bibiserv2/main/tools/instantbibi_resources
+	@hg clone ssh://hg@hg.cebitec.uni-bielefeld.de/bibiadm/bibiserv2/main/tools/instantbibi_resources
 
 tool: guugle
 
@@ -208,7 +208,7 @@ clean: base.clean appserver.clean codegen.clean bibimainapp.clean
 
 wipeall: domain.wipe appserver.kill
 	@echo "#WIPE"
-	@rm -rf glassfish* bibigf31 appserver_config bibimainapp base codegen logs instantbibi_resources
+	@rm -rf glassfish* bibigf31 appserver_config bibimainapp base codegen logs instantbibi_resources ${HOME}/.bibiser2_manager
 
 inst.antopt:
 	@echo "#INSTALL ant ${ANTARGS} optional libs to ${HOME}/.ant/lib"
