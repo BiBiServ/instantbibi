@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# currently four different platforms supported :
+
+# osx (64 Bit, tested with 10.6 )
+# linux (32 Bit, tested with Ubuntu 10.04 LTS)
+# linux (64 Bit, tested with Ubuntu 11.10 )
+# Solaris (x86_64, 32/64 Bit, tested with Solaris 10)
+
+
+if [ `uname` == "Linux" ]; then 
+	if [ 'uname -m' == "x86_64" ]; then
+		arch="linux_x64";
+	else			
+		arch="linux_x32";
+	fi;
+fi;
+
+
+if [ `uname` == "SunOS" ]; then 
+	arch="solaris_x64";
+fi;
+
+if [ `uname`=="Darwin" ]; then
+	arch="osx";
+fi;
+
+if [ -z $arch ]; then
+	echo "unknown/unsupported architecure";
+	exit;
+fi;
+
+cp -r instantbibi_resources/$arch/* $1

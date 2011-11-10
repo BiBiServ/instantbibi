@@ -60,7 +60,7 @@ ivy.wipe:
 ivy.cache: ivy.wipe
 		mkdir ~/ivy-rep; cd /tmp; wget -q -np -r http://bibiserv.techfak.uni-bielefeld.de/ivy-rep/; mv bibiserv.techfak.uni-bielefeld.de/ivy-rep/* ~/ivy-rep; rm -rf /tmp/bibiserv.techfak.uni-bielefeld.de;
 
-install: bibiserv2.manager gf31.rmzip gf31.get gf31.unzip gf31.rmzip appserver.createconfigs  update appserver.run ln.log
+install: bibiserv2.manager gf31.rmzip gf31.get gf31.unzip gf31.rmzip appserver.createconfigs  update appserver.run ln.log binaries.install
 
 download: codegen.get base.get appserver.get bibimainapp.get resources.get
 
@@ -104,7 +104,7 @@ appserver.get:
 
 appserver.createconfigs:
 	@echo "#APPSERVER_CONFIG: Creating configs"
-	@echo "catalina.home=`pwd`/bibigf31\ndomain.dir=${DOMAINDIR}\ndomain=bibidomain\nadmin.user=admin\nspool.dir=${TMPDIR}/spool\nexecutable.dir=/vol/biotools\nserver.portbase=8000\ndb.port=8027\nadmin.port=8048" > appserver_config/local.configuration
+	@echo "catalina.home=`pwd`/bibigf31\ndomain.dir=${DOMAINDIR}\ndomain=bibidomain\nadmin.user=admin\nspool.dir=${TMPDIR}/spool\nexecutable.dir=${DOMAINDIR}/bin\nserver.portbase=8000\ndb.port=8027\nadmin.port=8048" > appserver_config/local.configuration
 	@echo "AS_ADMIN_PASSWORD=admin\nAS_ADMIN_MASTERPASSWORD=changeit" > appserver_config/local.passwordfile
 
 appserver.run:
@@ -208,9 +208,13 @@ clean: base.clean appserver.clean codegen.clean bibimainapp.clean
 
 wipeall: domain.wipe appserver.kill
 	@echo "#WIPE"
-	@rm -rf glassfish* bibigf31 appserver_config bibimainapp base codegen logs
+	@rm -rf glassfish* bibigf31 appserver_config bibimainapp base codegen logs instantbibi_resources
 
 inst.antopt:
 	@echo "#INSTALL ant ${ANTARGS} optional libs to ${HOME}/.ant/lib"
 	@mkdir -p ${HOME}/.ant/lib
 	@cp .ant/lib/*.jar ${HOME}/.ant/lib
+	
+binaries.install :
+	@echo "#INSTALL (platform depended) binaries to ${DOMAINDIR}/bibidomain"
+	@.scripts/install_binaries ${DOMAINDIR}/bibidomain/bin

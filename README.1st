@@ -1,28 +1,48 @@
-InstantBiBi is a configuration tool to set up a complete BiBiServ(2) 
+InstantBiBi is a configuration tool to set up a complete BiBiServ2 
 environment.
 
-
-Idea for this configuration and initial release was initiated by Armin Toepfer 
-(Thanks Armin for the good work).
+The project was first initiated by Armin Toepfer (Thanks Armin for the good work).
 
 The configuration should be run on any unix like system, prerequisites are a
-bash, gnu make, java >= 1.6, ant >= 1.7. Running 'make' return a couple of
-(more or less) well described targets.
+bash, gnu make, java >= 1.6, ant >= 1.7. Running 'make' returns a couple of
+(more or less) well described targets. A BiBiServ2 environment from scratch
+is build running 'make instant'. After a successfull build you got an
+environment with the following properties :
+
+AppServer : Portbase 8000; 
+		-> http : 8080, 8048 (admin)
+		-> https : 8081
+		-> debug : 8009
+	    DOMAINDIR : /tmp/$USER/bibidomain
+	    EXECUTABLEDIR : /$DOMAINDIR/bin
+	    SPOOLDIR : /tmp/$USER/spool
+	    
+	    Glassfish admin user : 
+	    BiBiServ admin user :
+		
+Database  : Port 8027, no password -> accessible via localhost
+
+To install a sample tool , just call 'make guugle' or 'make dialign'. Remember,
+after generating and deploying a tool it is available via http://..../<TOOLID> 
+(guugle for GUUGle, and dialign for Dialign), but not linked on the left side menu.
+(This can be done withtin the bibiserv2 admin area).
+
 
 All BiBiServ2 projects ant build files make heavily use of some ant extensions, 
-located in .ant/lib subdirectory. These ant extension used by the Makefile are
-set through an environment variable ($ANT_ARGS).
+located in the .ant/lib subdirectory. These ant extension used by the Makefile 
+are set through an environment variable ($ANT_ARGS).
 
-If you want do more than just test the BiBiServ - develop/extend a tool for the BiBiServ2 -
-we suggest to copy these ant extensions to your local ant lib extention folder (which is
-normally $HOME/.ant/lib).
+If you want to do more than just test the BiBiServ2 - e.g. develop/extend a tool 
+for the BiBiServ2 - we suggest to copy these ant extensions to your local ant 
+lib extension folder (which is normally $HOME/.ant/lib).
 
 These configuration script was tested on :
 Solaris X64
 Linux X86 (Ubuntu 10.04)
-Linux X64 (Ubuntu 11.10)
+Linux X64 (Ubuntu 10.04/11.10)
 OSX 10.6 (running jdk 6)
-OSX 10.7 (running jdk 7)
+
+About 1 GB of free RAM is needed to run BiBiServ2 with acceptable performance.
 
 The BiBiServ Team - 11/09/2011
 
