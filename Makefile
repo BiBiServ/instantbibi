@@ -42,7 +42,8 @@ help:
 	@echo "restart.wipe : kills current glassfish instance, deletes old, creates & starts new domain"
 	@echo "deploy       : deploys bibimainapp, glassfish has to be running"
 	@echo "start        : see restart"
-	@echo "stop         : kill current glassfish instance, remove domain"
+	@echo "stop         : kill current glassfish instance"
+	@echo "stop.wipe    : kill current glassfish instance, remove domain"
 	@echo "this.update  : updates only instantbibi"
 	@echo "update       : updates all projects including instantbibi"
 	@echo "clean        : cleans all projects"
@@ -74,9 +75,11 @@ start: restart
 restart:
 	@cd appserver_config; ant ${ANTARGS} stop start
 
-restart.wipe: stop appserver.run
+stop:appserver.kill
 
-stop : appserver.kill domain.wipe
+restart.wipee: stop appserver.run
+
+stop.wipe : appserver.kill domain.wipe
 
 test:
 	@echo ${TMPDIR}
@@ -150,11 +153,10 @@ guugle: codegen.do guugle.do guugle.deploy
 dialign: codegen.do dialign.do dialign.deploy
 
 guugle.deploy: 
-	@echo "#TOOL: Deploying guugle"
-	
+	@echo "#TOOL: Deploying guugle"	
 	@bash -c "cp instantbibi_resources/src/guugle-1.2.src.tar.gz ${TMPDIR}/`ls ${TMPDIR} | grep guugle`/resources/downloads/guugle-1.2.src.tar.gz"
 	@bash -c "cd ${TMPDIR}/guugle*; ant ${ANTARGS} deploy"
-	
+
 dialign.deploy: 
 	@echo "#TOOL: Deploying dialign"
 	bash -c "cp instantbibi_resources/src/dialign-2.2.1-src.tar.gz ${TMPDIR}/`ls ${TMPDIR} | grep dialign`/resources/downloads/dialign-2.2.1-src.tar.gz"
@@ -214,7 +216,7 @@ inst.antopt:
 	@echo "#INSTALL ant ${ANTARGS} optional libs to ${HOME}/.ant/lib"
 	@mkdir -p ${HOME}/.ant/lib
 	@cp .ant/lib/*.jar ${HOME}/.ant/lib
-	
+
 binaries.install :
 	@echo "#INSTALL (platform depended) binaries to ${DOMAINDIR}/bibidomain"
 	@.scripts/install_binaries ${DOMAINDIR}/bibidomain/bin
