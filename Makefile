@@ -24,7 +24,7 @@
 ##
 
 
-TMPDIR=/tmp/${USER}
+TMPDIR=/home/jan/tmp
 DOMAINDIR=${TMPDIR}
 ANTARGS=-lib `pwd`/.ant/lib
 

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="instantbibi" basedir="." default="instant">
+    
+    <!-- build.xml should replace Makefile 
+    
+         not finished yet ...
+    -->
+    
+    <property name="bibiserv_url" value="http://bibiserv.cebitec.uni-bielefeld.de"/>
+    <property name="glassfish_url" value="http://download.java.net/glassfish/3.1.1/release/glassfish-3.1.1.zip"/>
+
+    <target name="instant" depends=".get" description="setup a complete BiBiServ2 environement using stable resources">
+        
+    </target>
+    
+    
+    <target name="instant.dev" description="setup a complete BiBiServ2 environment using latest developer resources from mercurial repository!">
+        
+    </target>
+    
+    
+    
+    <target name=".create.config">
+        
+        <echo>create configuration</echo>
+        <echo file="appserver_config/local.configuration">catalina.home=glassfish3
+domain.dir=
+domain=bibidomain
+admin.user=admin
+spool.dir=/spool
+executable.dir=${DOMAINDIR}/bibidomain/bin
+server.portbase=8000
+db.port=8027
+admin.port=8048</echo>       
+    </target>
+    
+    <target name=".unzip.glassfish" depends=".get.glassfish">
+        <unzip src=".cache/glassfish.zip" dest="."/>      
+    </target>
+    
+    <target name=".unzip.appserver.config" depends=".get.appserver.config">
+        <unzip src=".cache/appserver_config.zip" dest="."/>
+    </target>
+    
+    
+    
+    <!-- ######################## targets to download sources from server ########################### -->
+    
+    <target name=".get" depends=".get.appserver.config,.get.base,.get.instantbibi.resources,.get.bibimainapp,.get.glassfish "/> <!-- -->
+    
+    <target name=".get.appserver.config" depends=".check.appserver.config" unless=".available.appserver.config">
+        <echo> Download ${bibiserv_url}/resources/appserver_config.zip</echo>
+        <mkdir dir=".cache"/>
+        <get src="${bibiserv_url}/resources/appserver_config.zip" dest=".cache/appserver_config.zip" verbose="yes"/>
+    </target>
+    
+    <target name=".check.appserver.config">
+        <condition property=".available.appserver.config">
+            <available file=".cache/appserver_config.zip"/>        
+        </condition>    
+    </target>
+    
+    <target name=".get.base" depends=".check.base" unless=".available.base">
+        <echo> Download ${bibiserv_url}/resources/base.zip</echo>
+        <mkdir dir=".cache"/>
+        <get src="${bibiserv_url}/resources/base.zip" dest=".cache/base.zip" verbose="yes"/>
+    </target>
+    
+    <target name=".check.base">
+        <condition property=".available.base">
+            <available file=".cache/base.zip"/>        
+        </condition>    
+    </target>
+    
+    <target name=".get.instantbibi.resources" depends=".check.instantbibi.resources" unless=".available.instantbibi.resources">
+        <echo> Download ${bibiserv_url}/resources/instantbibi_resources.zip</echo>
+        <mkdir dir=".cache"/>
+        <get src="${bibiserv_url}/resources/instantbibi_resources.zip" dest=".cache/instantbibi_resources.zip" verbose="yes"/>
+    </target>
+    
+    <target name=".check.instantbibi.resources">
+        <condition property=".available.instantbibi.resources">
+            <available file=".cache/instantbibi_resources.zip"/>        
+        </condition>    
+    </target>
+    
+    <target name=".get.bibimainapp" depends=".check.bibimainapp" unless=".available.bibimainapp">
+        <echo> Download ${bibiserv_url}/resources/bibimainapp.war</echo>
+        <mkdir dir=".cache"/>
+        <get src="${bibiserv_url}/resources/bibimainapp.war" dest=".cache/bibimainapp.war" verbose="yes"/>
+    </target>
+    
+    <target name=".check.bibimainapp">
+        <condition property=".available.bibimainapp">
+            <available file=".cache/bibimainapp.war"/>        
+        </condition>    
+    </target>
+    
+    <target name=".get.glassfish" depends=".check.glassfish" unless=".available.glassfish">
+        <echo> Download ${glassfish_url}</echo>
+        <mkdir dir=".cache"/>
+        <get src="${glassfish_url}" dest=".cache/glassfish.zip" verbose="yes"/>
+    </target>
+    
+    <target name=".check.glassfish">
+        <condition property=".available.glassfish">
+            <available file=".cache/glassfish.zip"/>        
+        </condition>    
+    </target>
+    
+    <!-- clean up  everything -->
+    
+    <target name="wipe.all">
+        
+        
+    </target>
+    
+    
+</project>
