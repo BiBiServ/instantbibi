@@ -2,6 +2,7 @@
 
 <project name="instantbibi" basedir="." default="instant">
     
+   <!--  <loadresource></loadresource> -->
     <!-- build.xml should replace Makefile 
     
          not finished yet ...
@@ -9,8 +10,26 @@
     
     <property name="bibiserv_url" value="http://bibiserv.cebitec.uni-bielefeld.de"/>
     <property name="glassfish_url" value="http://download.java.net/glassfish/3.1.1/release/glassfish-3.1.1.zip"/>
+    <property name="BASEDIR" value="/tmp/${user.name}"/>
+    <property name="SPOOLDIR" value="${BASEDIR}/spool"/>
+    <property name="EXECDIR" value="${BASEDIR}/bin"/>
+    <property name="PORTBASE" value="18000"/>
+    <property name="DPPORT" value="18027"/>
+    <property name="ADMINPORT" value="18048"/>
+    
+    <!-- Script to calculate the java db port and set the variable ${db.port} from the given portbase -->
+    <!-- <scriptdef name="setPorts" language="javascript">
+        <attribute name="portbase"/>
+        <![CDATA[
+        project.setNewProperty("DBPORT", (parseInt(attributes.get("PORTBASE"))+27));
+        project.setNewProperty("ADMINPORT", (parseInt(attributes.get("PORTBASE"))+48));
+    ]]>
+    </scriptdef> -->
 
-    <target name="instant" depends=".get" description="setup a complete BiBiServ2 environement using stable resources">
+
+    
+
+    <target name="instant" depends=".get,.create.config,.create.domain" description="setup a complete BiBiServ2 environement using stable resources">
         
     </target>
     
@@ -19,24 +38,49 @@
         
     </target>
     
-    
-    
-    <target name=".create.config">
-        
-        <echo>create configuration</echo>
-        <echo file="appserver_config/local.configuration">catalina.home=glassfish3
-domain.dir=
-domain=bibidomain
-admin.user=admin
-spool.dir=/spool
-executable.dir=${DOMAINDIR}/bibidomain/bin
-server.portbase=8000
-db.port=8027
-admin.port=8048</echo>       
+  
+    <target name="start" description="start glassfish/database and deploys bibimainapp">
+        <ant antfile="appserver_config/build.xml" target="start" dir="appserver_config"/>
+        <antcall target="deploy"/>
     </target>
     
+    <target name="deploy" description="deploys bibimainapp ">
+        <exec executable="asadmin" dir="glassfish3/bin">
+            <arg/>
+        </exec>
+    </target>
+    
+    <target name="stop" description="stops glassfish and database">
+        <ant antfile="build.xml" target="stop"  dir="appserver_config"/>
+    </target>
+    
+    <target name=".create.domain" depends=".create.config">
+        
+        <ant antfile="build.xml" target="configure" dir="appserver_config"/>
+    </target>
+    
+    <target name=".create.config">     
+        <echo>create configuration</echo>
+        <echo file="appserver_config/local.configuration">catalina.home=${basedir}/glassfish3
+domain.dir=${BASEDIR}
+domain=bibidomain
+admin.user=admin
+spool.dir=${SPOOLDIR}
+executable.dir=${EXECDIR}
+server.portbase=${PORTBASE}
+db.port=${DBPORT}
+admin.port=${ADMINPORT}</echo>
+        <echo file="appserver_config/local.passwordfile">AS_ADMIN_PASSWORD=admin
+AS_ADMIN_MASTERPASSWORD=changeit</echo>
+    </target>
+    
+    
+    
+    
     <target name=".unzip.glassfish" depends=".get.glassfish">
-        <unzip src=".cache/glassfish.zip" dest="."/>      
+        <unzip src=".cache/glassfish.zip" dest="."/>     
+        <chmod executable="true" file="glassfish3/bin/asadmin"/>
+        <chmod executable="true" file="glassfish3/javadb/bin/ij"/>
     </target>
     
     <target name=".unzip.appserver.config" depends=".get.appserver.config">
