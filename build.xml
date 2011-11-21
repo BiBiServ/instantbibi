@@ -10,12 +10,12 @@
     
     <property name="bibiserv_url" value="http://bibiserv.cebitec.uni-bielefeld.de"/>
     <property name="glassfish_url" value="http://download.java.net/glassfish/3.1.1/release/glassfish-3.1.1.zip"/>
-    <property name="BASEDIR" value="/tmp/${user.name}"/>
-    <property name="SPOOLDIR" value="${BASEDIR}/spool"/>
-    <property name="EXECDIR" value="${BASEDIR}/bin"/>
-    <property name="PORTBASE" value="18000"/>
-    <property name="DPPORT" value="18027"/>
-    <property name="ADMINPORT" value="18048"/>
+    <property name="base.dir" value="/tmp/${user.name}"/>
+    <property name="spool.dir" value="${BASEDIR}/spool"/>
+    <property name="exec.dir" value="${BASEDIR}/bin"/>
+    <property name="portbase" value="18000"/>
+    <property name="bp.port" value="18027"/>
+    <property name="admin.port" value="18048"/>
     
     <!-- Script to calculate the java db port and set the variable ${db.port} from the given portbase -->
     <!-- <scriptdef name="setPorts" language="javascript">
@@ -61,26 +61,26 @@
     
     <target name=".create.config">     
         <echo>create configuration</echo>
-        <echo file="appserver_config/local.configuration">catalina.home=${basedir}/glassfish3
-domain.dir=${BASEDIR}
-domain=bibidomain
-admin.user=admin
-spool.dir=${SPOOLDIR}
-executable.dir=${EXECDIR}
-server.portbase=${PORTBASE}
-db.port=${DBPORT}
-admin.port=${ADMINPORT}</echo>
-        <echo file="appserver_config/local.passwordfile">AS_ADMIN_PASSWORD=admin
-AS_ADMIN_MASTERPASSWORD=changeit</echo>
+        <propertyfile file="appserver_config/local.configuration">
+            <entry key="catalina.home" value="${basedir}/glassfish3"/>
+            <entry key="domain.dir" value="${base.dir}"/>
+            <entry key="domain" value="bibidomain"/>
+            <entry key="admin.user" value="admin"/>
+            <entry key="spool.dir" value="${spool.dir}"/>
+            <entry key="executable.dir" value="${exec.dir}"/>
+            <entry key="server.portbase" value="${portbase}"/>
+            <entry key="dp.port" value="${db.port}"/>
+            <entry key="admin.port" value="${admin.port}"/>       
+        </propertyfile>
+        <propertyfile file="appserver_config/local.passwordfile">
+            <entry key="AS_ADMIN_PASSWORD" value="admin"/>
+            <entry key="AS_ADMIN_MASTERPASSWORD" value="changeit"/>
+        </propertyfile>
     </target>
-    
-    
-    
-    
     <target name=".unzip.glassfish" depends=".get.glassfish">
         <unzip src=".cache/glassfish.zip" dest="."/>     
-        <chmod executable="true" file="glassfish3/bin/asadmin"/>
-        <chmod executable="true" file="glassfish3/javadb/bin/ij"/>
+        <chmod perm="ugo+rx" file="glassfish3/bin/asadmin"/>
+        <chmod perm="ugo+rx" file="glassfish3/javadb/bin/ij"/>
     </target>
     
     <target name=".unzip.appserver.config" depends=".get.appserver.config">
