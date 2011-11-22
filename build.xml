@@ -1,4 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+    
+    Copyright 2011 BiBiServ Curator Team, http://bibiserv.cebitec.uni-bielefeld.de,
+    All rights reserved.
+    
+    The contents of this file are subject to the terms of the Common
+    Development and Distribution License("CDDL") (the "License"). You
+    may not use this file except in compliance with the License. You can
+    obtain a copy of the License at http://www.sun.com/cddl/cddl.html
+    
+    See the License for the specific language governing permissions and
+    limitations under the License.  When distributing the software, include
+    this License Header Notice in each file.  If applicable, add the following
+    below the License Header, with the fields enclosed by brackets [] replaced
+    by your own identifying information:
+    
+    "Portions Copyrighted 2011 BiBiServ Curator Team, http://bibiserv.cebitec.uni-bielefeld.de"
+    
+    Contributor(s): Jan Krueger
+    
+    Authors: Jan Krueger, jkrueger(at)cebitec.uni-bielefeld.de
+             Armin Toepfer, atoepfer(at)techfak.uni-bielefeld.de (initial release  based on make)
+     -->
+
 
 <project name="instantbibi" basedir="." default="instant">
     
@@ -11,8 +36,8 @@
     <property name="bibiserv_url" value="http://bibiserv.cebitec.uni-bielefeld.de"/>
     <property name="glassfish_url" value="http://download.java.net/glassfish/3.1.1/release/glassfish-3.1.1.zip"/>
     <property name="base.dir" value="/tmp/${user.name}"/>
-    <property name="spool.dir" value="${BASEDIR}/spool"/>
-    <property name="exec.dir" value="${BASEDIR}/bin"/>
+    <property name="spool.dir" value="${base.dir}/spool"/>
+    <property name="exec.dir" value="${base.dir}/bin"/>
     <property name="portbase" value="18000"/>
     <property name="bp.port" value="18027"/>
     <property name="admin.port" value="18048"/>
@@ -29,19 +54,20 @@
 
     
 
-    <target name="instant" depends=".get,.create.config,.create.domain" description="setup a complete BiBiServ2 environement using stable resources">
-        
+    <target name="instant" depends=".get,.unzip,.create.config,.create.domain,start" description="create/configure GF, deploys bibimainapp using stable resources">
+        <echo>ant instant finished</echo>
     </target>
     
     
     <target name="instant.dev" description="setup a complete BiBiServ2 environment using latest developer resources from mercurial repository!">
-        
+        <echo>Not Yet Implemented!</echo>
     </target>
     
   
     <target name="start" description="start glassfish/database and deploys bibimainapp">
         <ant antfile="appserver_config/build.xml" target="start" dir="appserver_config"/>
         <antcall target="deploy"/>
+        <echo>Server started and BiBiMainApp deployed ...</echo>
     </target>
     
     <target name="deploy" description="deploys bibimainapp ">
@@ -53,6 +79,16 @@
     <target name="stop" description="stops glassfish and database">
         <ant antfile="build.xml" target="stop"  dir="appserver_config"/>
     </target>
+    
+    <!-- clean up  including unzipped everything -->
+    <target name="wipe.all" depends="stop">
+        <delete>
+            <f
+        </delete>
+        
+    </target>
+    
+    <!-- ######################## create and configure new domain   ########################### -->
     
     <target name=".create.domain" depends=".create.config">
         
@@ -77,6 +113,13 @@
             <entry key="AS_ADMIN_MASTERPASSWORD" value="changeit"/>
         </propertyfile>
     </target>
+    
+    <!-- ######################## unzip downloaded sources  ########################### -->
+    
+    <target name=".unzip" depends=".unzip.glassfish,.unzip.appserver.config">
+        
+    </target>
+    
     <target name=".unzip.glassfish" depends=".get.glassfish">
         <unzip src=".cache/glassfish.zip" dest="."/>     
         <chmod perm="ugo+rx" file="glassfish3/bin/asadmin"/>
@@ -152,13 +195,5 @@
             <available file=".cache/glassfish.zip"/>        
         </condition>    
     </target>
-    
-    <!-- clean up  everything -->
-    
-    <target name="wipe.all">
-        
-        
-    </target>
-    
-    
+       
 </project>
