@@ -25,22 +25,39 @@
      -->
 
 
-<project name="instantbibi" basedir="." default="instant">
+<project name="instantbibi" basedir="." default="help" xmlns:antcontrib="antlib:net.sf.antcontrib" xmlns:ivy="antlib:org.apache.ivy.ant">
     
-   <!--  <loadresource></loadresource> -->
-    <!-- build.xml should replace Makefile 
+   <!-- load antlib for ant-contrib, ivy and jsch -->
     
-         not finished yet ...
-    -->
+    <path id="antlib">
+        <fileset dir=".ant/lib">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+    
+    <taskdef uri="antlib:net.sf.antcontrib"
+             resource="net/sf/antcontrib/antlib.xml"
+             classpathref="antlib"/>
+    
+    <taskdef uri="antlib:org.apache.ivy.ant"
+             resource="org/apache/ivy/ant/antlib.xml"
+             classpathref="antlib"/>
+             
+    
+   
+   <!-- environment variables -->
+    
+    <property environment="env"/>
     
     <property name="bibiserv_url" value="http://bibiserv.cebitec.uni-bielefeld.de"/>
     <property name="glassfish_url" value="http://download.java.net/glassfish/3.1.1/release/glassfish-3.1.1.zip"/>
     <property name="base.dir" value="/tmp/${user.name}"/>
     <property name="spool.dir" value="${base.dir}/spool"/>
     <property name="exec.dir" value="${base.dir}/bin"/>
-    <property name="portbase" value="18000"/>
-    <property name="bp.port" value="18027"/>
-    <property name="admin.port" value="18048"/>
+    <property name="tool.dir" value="${base.dir}/gentools"/> <!-- directory where to create tools from description --> 
+    <property name="portbase" value="8000"/>
+    <property name="db.port" value="8027"/>
+    <property name="admin.port" value="8048"/>
     
     <!-- Script to calculate the java db port and set the variable ${db.port} from the given portbase -->
     <!-- <scriptdef name="setPorts" language="javascript">
@@ -51,7 +68,10 @@
     ]]>
     </scriptdef> -->
 
-
+    <target name="test">
+        <echo>${</echo>
+    </target>
+    
     
 
     <target name="instant" depends=".get,.unzip,.create.config,.create.domain,start" description="create/configure GF, deploys bibimainapp using stable resources">
@@ -65,14 +85,21 @@
     
   
     <target name="start" description="start glassfish/database and deploys bibimainapp">
-        <ant antfile="appserver_config/build.xml" target="start" dir="appserver_config"/>
+        <ant antfile="build.xml" target="start" dir="appserver_config"/>
         <antcall target="deploy"/>
         <echo>Server started and BiBiMainApp deployed ...</echo>
     </target>
     
-    <target name="deploy" description="deploys bibimainapp ">
-        <exec executable="asadmin" dir="glassfish3/bin">
-            <arg/>
+    <target name="deploy" description="(re)deploys bibimainapp ">
+        <exec executable="${basedir}/glassfish3/bin/asadmin" failifexecutionfails="true" failonerror="true">
+            <arg value="--user=admin"/>
+            <arg value="--passwordfile=appserver_config/local.passwordfile"/>
+            <arg value="--port=${admin.port}"/>
+            <arg value="--host=localhost"/>
+            <arg value="deploy"/>
+            <arg value="--force"/>
+            <arg value="--contextroot="/>
+            <arg value=".cache/bibimainapp.war"/>       
         </exec>
     </target>
     
@@ -80,12 +107,16 @@
         <ant antfile="build.xml" target="stop"  dir="appserver_config"/>
     </target>
     
-    <!-- clean up  including unzipped everything -->
-    <target name="wipe.all" depends="stop">
-        <delete>
-            <f
-        </delete>
-        
+    <target name="wipe" depends="stop" description="stops GF and clean up domain including spool and exec dir!">
+        <delete dir="${spool.dir}"/>
+        <delete dir="${exec.dir}"/>
+        <delete dir="${base.dir}/bibidomain"/>
+        <delete dir="${tools.dir}"/>
+    </target>
+    
+    <target name="wipe.all" depends="wipe" description="depends on wipe and remove install directories">
+        <delete dir="appserver_config"/>
+        <delete dir="glassfish3"/>
     </target>
     
     <!-- ######################## create and configure new domain   ########################### -->
@@ -95,24 +126,41 @@
         <ant antfile="build.xml" target="configure" dir="appserver_config"/>
     </target>
     
-    <target name=".create.config">     
-        <echo>create configuration</echo>
-        <propertyfile file="appserver_config/local.configuration">
-            <entry key="catalina.home" value="${basedir}/glassfish3"/>
-            <entry key="domain.dir" value="${base.dir}"/>
-            <entry key="domain" value="bibidomain"/>
-            <entry key="admin.user" value="admin"/>
-            <entry key="spool.dir" value="${spool.dir}"/>
-            <entry key="executable.dir" value="${exec.dir}"/>
-            <entry key="server.portbase" value="${portbase}"/>
-            <entry key="dp.port" value="${db.port}"/>
-            <entry key="admin.port" value="${admin.port}"/>       
-        </propertyfile>
-        <propertyfile file="appserver_config/local.passwordfile">
-            <entry key="AS_ADMIN_PASSWORD" value="admin"/>
-            <entry key="AS_ADMIN_MASTERPASSWORD" value="changeit"/>
-        </propertyfile>
+    <target name=".create.config">
+        <available file="appserver_config/local.configuration" property="config.present"
+            value="true"/>
+        <antcontrib:if>
+            <not>
+                <isset property="config.present"/>
+            </not>
+            <antcontrib:then>
+                <echo>create configuration </echo>
+                <propertyfile file="appserver_config/local.configuration">
+                    <entry key="catalina.home" value="${basedir}/glassfish3"/>
+                    <entry key="domain.dir" value="${base.dir}"/>
+                    <entry key="domain" value="bibidomain"/>
+                    <entry key="admin.user" value="admin"/>
+                    <entry key="spool.dir" value="${spool.dir}"/>
+                    <entry key="executable.dir" value="${exec.dir}"/>
+                    <entry key="server.portbase" value="${portbase}"/>
+                    <entry key="dp.port" value="${db.port}"/>
+                    <entry key="admin.port" value="${admin.port}"/>
+                </propertyfile>
+                <propertyfile file="appserver_config/local.passwordfile">
+                    <entry key="AS_ADMIN_PASSWORD" value="admin"/>
+                    <entry key="AS_ADMIN_MASTERPASSWORD" value="changeit"/>
+                </propertyfile>
+            </antcontrib:then>
+            <antcontrib:else>
+                <echo>found previous configuration, do not create a new one.</echo>
+            </antcontrib:else>
+        </antcontrib:if>
     </target>
+    
+    <!-- include ant-contrib tasks -->
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+        <classpath path=".ant/lib/ant-contrib-0.6.jar"/>
+    </taskdef>
     
     <!-- ######################## unzip downloaded sources  ########################### -->
     
@@ -149,9 +197,9 @@
     </target>
     
     <target name=".get.base" depends=".check.base" unless=".available.base">
-        <echo> Download ${bibiserv_url}/resources/base.zip</echo>
+        <echo> Download ${bibiserv_url}/resources/base.zip (depending on your bandwidth this take a while)</echo>
         <mkdir dir=".cache"/>
-        <get src="${bibiserv_url}/resources/base.zip" dest=".cache/base.zip" verbose="yes"/>
+        <get src="${bibiserv_url}/resources/base.zip" dest=".cache/base.zip" verbose="no"/>
     </target>
     
     <target name=".check.base">
@@ -195,5 +243,22 @@
             <available file=".cache/glassfish.zip"/>        
         </condition>    
     </target>
+    
+    <!-- ######################## targets to download sources from server ########################### -->
+    <target name="help" description="print out a help message (same as ant -p)">
+        <echo>Main targets:
+
+ deploy       (re)deploys bibimainapp 
+ help         print out a help message (same as ant -p)
+ instant      create/configure GF, deploys bibimainapp using stable resources
+ instant.dev  setup a complete BiBiServ2 environment using latest developer resources from mercurial repository!
+ start        start glassfish/database and deploys bibimainapp
+ stop         stops glassfish and database
+ wipe         stops GF and clean up domain including spool and exec dir!
+ wipe.all     depends on wipe and remove install directories
+Default target: help
+        </echo>  
+    </target> 
+   
        
 </project>
