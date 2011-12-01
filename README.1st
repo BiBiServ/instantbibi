@@ -1,32 +1,16 @@
 InstantBiBi is a configuration tool to set up a complete BiBiServ2 
 environment.
 
-The project was first initiated by Armin Toepfer (Thanks Armin for the good work).
+The project was first initiated by Armin Toepfer (Thanks Armin for the good work)
+and then modified by Jan Krueger. If found any bugs or have some suggestions
+don't hesitate to contact me (jkrueger(aet)cebitec.uni-bielefeld.de).
 
-The configuration should be run on any unix like system, prerequisites are a
-bash, gnu make, java >= 1.6, ant >= 1.7. Running 'make' returns a couple of
-(more or less) well described targets. A BiBiServ2 environment from scratch
-is build running 'make instant'. After a successfull build you got an
-environment with the following properties :
-
-AppServer : Portbase 8000; 
-		-> http : 8080, 8048 (admin)
-		-> https : 8081
-		-> debug : 8009
-	    DOMAINDIR : /tmp/$USER/bibidomain
-	    EXECUTABLEDIR : /$DOMAINDIR/bin
-	    SPOOLDIR : /tmp/$USER/spool
-	    
-	    Glassfish admin user : 
-	    BiBiServ admin user :
-		
-Database  : Port 8027, no password -> accessible via localhost
+ToDo: Write an introductionary text for using the ant build file ....
 
 To install a sample tool , just call 'make guugle' or 'make dialign'. Remember,
 after generating and deploying a tool it is available via http://..../<TOOLID> 
 (guugle for GUUGle, and dialign for Dialign), but not linked on the left side menu.
 (This can be done withtin the bibiserv2 admin area).
-
 
 All BiBiServ2 projects ant build files make heavily use of some ant extensions, 
 located in the .ant/lib subdirectory. These ant extension used by the Makefile 

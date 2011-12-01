@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module  version="2.0">
+    
+    <!-- The info tag is mandantory and set the modul name, the revision number (optional, but recommend and 
+         necessary if published on bibiserv repository) and the name of the providing organisation -->
+    <info organisation="de.unibi.cebitec.bibiserv" module="instantbibi" revision="1.0" />
+    
+    <!-- The publication tab can contain 0 or more artifacts  tags :
+         see http://ant.apache.org/ivy/history/2.1.0-rc1/ivyfile/publications.html 
+         for detailed description -->
+    <!-- 
+         Since we do not publish anything, we can comment out the following ...
+        
+    <publications>
+        <artifact name="[NAME OF ARTIFACT]" ext="[NAME OF EXTENSION]"/>
+    </publications> 
+    
+    -->
+    
+    <!-- <configurations>
+        
+        <conf name="runtime" description="all artifacts/dependencies needed at runtime"/>
+        <conf name="compile" description="all artifacts/dependencies needed for compilation"/>
+    </configurations> -->
+    
+    <!-- The dependencies tag can contain 0 or more dependency tags :
+        see http://ant.apache.org/ivy/history/2.1.0-rc1/ivyfile/dependencies.html
+        for detailed description -->
+    <dependencies>
+        <dependency org="de.unibi.techfak.bibiserv" name="ManagerClient" rev="" revConstraint="latest.integration"/>
+    </dependencies>
+    
+</ivy-module>
