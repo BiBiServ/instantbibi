@@ -50,7 +50,7 @@
     <!-- following properties can be overwritten calling ant with -Dpropertyname=propertyvalue --> 
     
     <property name="bibiserv_url" value="http://bibiserv.cebitec.uni-bielefeld.de"/>
-    <property name="glassfish_url" value="http://download.java.net/glassfish/3.1.1/release/glassfish-3.1.1.zip"/>
+    <property name="glassfish_url" value="http://download.java.net/glassfish/3.1.1/release"/>
     <property name="base.dir" value="/tmp/${user.name}"/>
     <property name="spool.dir" value="${base.dir}/spool"/>
     <property name="exec.dir" value="${base.dir}/bin"/>
@@ -340,7 +340,7 @@
     
     <target name=".unzip" >
         <!-- glassfish -->
-        <unzipResource resource=".cache/glassfish.zip" depdir="glassfish3"/>
+        <unzipResource resource=".cache/glassfish-3.1.1.zip" depdir="glassfish3"/>
         <chmod perm="ugo+rx" file="glassfish3/bin/asadmin"/>
         <chmod perm="ugo+rx" file="glassfish3/javadb/bin/ij"/>
         <!-- appserver config -->
@@ -385,7 +385,7 @@
         <checkAndDownload resource="bibimainapp.war" url="${bibiserv_url}/resources"/>
         <checkAndDownload resource="appserver_config.zip" url="${bibiserv_url}/resources"/>
         <checkAndDownload resource="base.zip" url="${bibiserv_url}/resources"/>
-        <checkAndDownload resource="glassfish.zip" url="${glassfish_url}" checksum="bf92c2c99b3d53b83bbc8c7e2124a897"/>
+        <checkAndDownload resource="glassfish-3.1.1.zip" url="${glassfish_url}" checksum="bf92c2c99b3d53b83bbc8c7e2124a897"/>
     </target> 
       
     <macrodef name="checkAndDownload"
