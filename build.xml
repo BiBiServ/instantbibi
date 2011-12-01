@@ -59,6 +59,8 @@
      
     <property name="ant.lib.path" refid="antlib"/> <!-- for external ant calls -->
     
+    <property name="lib.dir" value=".lib"/> <!-- dir for ivy libs -->
+    
     <!-- Script to calculate the java db port and set the variable ${db.port} from the given portbase -->
     <scriptdef name="setPorts" language="javascript">
         <attribute name="portbase"/>
@@ -247,7 +249,7 @@
         </antcontrib:if>
     </target>
     
-    <target name=".create.bibimainapp.pwfile">
+    <target name=".create.bibimainapp.pwfile" depends=".port.setting">
         <tstamp>
             <format property="CURRENT" pattern="MMddyyyy_hhmm"/>
         </tstamp>
@@ -273,7 +275,8 @@
                 <propertyfile file="${user.home}/.bibiserv2_manager">
                     <entry key="role" value="testadmin"/>
                     <entry key="password" value="simplepassword"/>
-                    <entry key="port" value="${"/>
+                    <entry key="port" value="${http.port}"/>
+                    <entry key="server" value="localhost"/>
                 </propertyfile>
             </antcontrib:then>
         </antcontrib:if>
@@ -516,12 +519,12 @@ and .vol/bibiserv2 as base dir.
            <!-- deploy bar archive to server -->
             <java classname="de.unibi.cebitec.bibiserv.client.manager.ManagerClient" fork="true">
                         <classpath>
-                                <fileset dir="${lib.compile.dir}">
+                                <fileset dir="lib">
                                         <include name="*.jar"/>
                                 </fileset>
                         </classpath>
                         <arg value="deploy"/>
-                        <arg value="${dist.dir}/${ant.project.name}.bar"/>
+                <arg value=".tmp.@{name}/@{name}.bar"/>
              </java>
 
            
@@ -533,9 +536,8 @@ and .vol/bibiserv2 as base dir.
     
     <!-- use ivy to resolve  library dependencies -->
     <target name=".resolve" >
-        <mkdir dir="${lib}"/>
         <ivy:settings url="http://bibiserv.techfak.uni-bielefeld.de/ivy-rep/ivysettings.xml"/>
-        <ivy:retrieve/>
+        <ivy:retrieve />
     </target>
     
     
