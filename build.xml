@@ -51,15 +51,7 @@
     
     <property name="bibiserv_url" value="http://bibiserv.cebitec.uni-bielefeld.de"/>
     <property name="glassfish_url" value="http://download.java.net/glassfish/3.1.1/release"/>
-    <property name="base.dir" value="/tmp/${user.name}"/>
-    <property name="spool.dir" value="${base.dir}/spool"/>
-    <property name="exec.dir" value="${base.dir}/bin"/>
-    <property name="tool.dir" value="${base.dir}/gentools"/> <!-- directory where to create tools from description --> 
-    <property name="portbase" value="8000"/> 
-     
     <property name="ant.lib.path" refid="antlib"/> <!-- for external ant calls -->
-    
-    <property name="lib.dir" value=".lib"/> <!-- dir for ivy libs -->
     
     <!-- Script to calculate the java db port and set the variable ${db.port} from the given portbase -->
     <scriptdef name="setPorts" language="javascript">
@@ -72,12 +64,29 @@
     ]]>
     </scriptdef>
 
+    <target name="showconfig" description="shows current configuration" depends=".config.setting">
+        <echo>Current configuration:</echo>
+        <echo>base dir   : ${base.dir}</echo>
+        <echo>spool dir  : ${spool.dir}</echo>
+        <echo>exec dir   : ${exec.dir}</echo>
+        <echo>tool dir   : ${tool.dir}</echo>
+        <echo>portbase   : ${portbase}</echo>
+        <echo>db port    : ${db.port}</echo>
+        <echo>admin port : ${admin.port}</echo>
+        <echo>http port  : ${http.port}</echo>
+        <echo>htpps port : ${https.port}</echo>
+    </target>
+    
+    
+
     <target name="instant" description="create/configure GF, deploys bibimainapp using stable resources">
+       
         <antcall target=".get"/>
         <antcall target=".unzip"/>
         <antcall target=".create.config"/>
         <antcall target=".create.domain"/>
         <antcall target="start"/>
+        <antcall target="showconfig"/>
     </target>
     
     
@@ -86,6 +95,7 @@
         <antcall target=".create.config"/>
         <antcall target=".create.domain"/>
         <antcall target="start"/>
+        <antcall target="showconfig"/>
     </target>
     
     <target name="update.dev" description="updates appserver_config, bibimainapp, base from mercurial" depends=".mercurial"/>
@@ -140,7 +150,7 @@
         <echo>Server started and BiBiMainApp deployed ...</echo>
     </target>
     
-    <target name="deploy" depends=".port.setting" description="(re)deploys bibimainapp"> 
+    <target name="deploy" depends=".config.setting" description="(re)deploys bibimainapp"> 
         <antcontrib:if>
             <available file="bibimainapp"/>  
             <antcontrib:then>
@@ -177,11 +187,13 @@
     
     
     
-    <target name="wipe" depends="stop" description="stops GF and clean up domain including spool and exec dir!">
+    <target name="wipe" depends=".config.setting, stop" description="stops GF and clean up domain including spool and exec dir!" >
         <delete dir="${spool.dir}"/>
         <delete dir="${exec.dir}"/>
         <delete dir="${base.dir}/bibidomain"/>
         <delete dir="${tools.dir}"/>
+        <delete dir="." includes=".tmp.*"/>
+        <delete file="instant.config"/>   
     </target>
     
     <target name="wipe.all" depends="wipe" description="depends on wipe and remove install directories">
@@ -194,18 +206,36 @@
     
     <!-- ######################## create and configure new domain   ########################### -->
 
-    <target name=".port.setting">
-        <setPorts portbase="${portbase}"/>
-        <echo>used ports:</echo>
-        <echo>portbase   : ${portbase}</echo>
-        <echo>db.port    : ${db.port} (if not set : portbase + 27)</echo>
-        <echo>admin.port : ${admin.port} (if not set: portbase + 48)</echo>
-        <echo>http.port  : ${http.port}</echo>
-        <echo>https.port : ${https.port}</echo>
-        
+    <target name=".config.setting">
+        <antcontrib:if>
+            <available file="instant.config"/>
+            <antcontrib:then>
+                <echo>use existing configuration file ...</echo>
+                <loadproperties srcFile="instant.config"/>
+            </antcontrib:then>
+            <antcontrib:else>
+                <property name="portbase" value="8000"/>
+                <setPorts portbase="${portbase}"/>
+                <property name="base.dir" value="/tmp/${user.home}"/>
+                <property name="spool.dir" value="${base.dir}/spool"/>
+                <property name="exec.dir" value="${base.dir}/bin"/>
+                <property name="tool.dir" value="${base.dir}/gentools"/>
+                <propertyfile file="instant.config">
+                    <entry key="portbase" value="${portbase}"/>
+                    <entry key="db.port" value="${db.port}"/>
+                    <entry key="admin.port" value="${admin.port}"/>
+                    <entry key="http.port" value="${http.port}"/>
+                    <entry key="https.port" value="${https.port}"/>
+                    <entry key="base.dir" value="${base.dir}"/>
+                    <entry key="spool.dir" value="${spool.dir}"/>
+                    <entry key="exec.dir" value="${exec.dir}"/>
+                    <entry key="tool.dir" value="${tool.dir}"/>            
+                </propertyfile>
+            </antcontrib:else>
+        </antcontrib:if>
     </target>
     
-    <target name=".create.domain" depends=".check, .create.config, .create.bibimainapp.pwfile">
+    <target name=".create.domain" depends=".create.config, .create.bibimainapp.pwfile, .check">
         <available file="${base.dir}/bibidomain" property="domain.present"/>
         <antcontrib:if>
             <isset property="domain.present"/>
@@ -220,7 +250,7 @@
         </antcontrib:if>
     </target>
     
-    <target name=".create.config" depends=".port.setting">  
+    <target name=".create.config" depends=".config.setting">  
         <antcontrib:if>
             <not>
                 <available file="appserver_config/local.configuration" property="config.present" value="true"/>
@@ -249,7 +279,7 @@
         </antcontrib:if>
     </target>
     
-    <target name=".create.bibimainapp.pwfile" depends=".port.setting">
+    <target name=".create.bibimainapp.pwfile" depends=".config.setting">
         <tstamp>
             <format property="CURRENT" pattern="MMddyyyy_hhmm"/>
         </tstamp>
@@ -282,28 +312,58 @@
         </antcontrib:if>
     </target>
     
-    <target name=".check">
-      
-        
+    <target name=".check"> 
         <antcontrib:if>
                 <available file="${base.dir}"/>
             <antcontrib:then>
                 <echo>${base.dir} exist ... </echo>
                 <touch file="${base.dir}/ok"/>
-                
-                
             </antcontrib:then>
             <antcontrib:else>
                 <echo>Create ${base.dir} ...</echo>
                 <mkdir dir="${base.dir}"/>
             </antcontrib:else>
-            
-        </antcontrib:if>
-        
+        </antcontrib:if>   
+        <antcontrib:if>
+            <and>
+                <available file="${spool.dir}"/>
+                <available file="${spoold.dir}/tmp"/>
+            </and>
+            <antcontrib:then>
+                <echo>${spool.dir} exist ...</echo>
+                <touch file="${spool.dir}/ok"/>
+                <touch file="${spool.dir}/tmp/ok"/>
+            </antcontrib:then>
+            <antcontrib:else>
+                <echo>Create ${spool.dir} &amp; ${spool.dir}/tmp ...</echo>
+                <mkdir dir="${spool.dir}"/>
+                <mkdir dir="${spool.dir}/tmp"/>
+            </antcontrib:else>
+        </antcontrib:if>       
+        <antcontrib:if>
+            <available file="${exec.dir}"/>
+                <antcontrib:then>
+                    <echo>${exec.dir} exist ...</echo>
+                    <touch file="${exec.dir}/ok"/>
+                        
+                </antcontrib:then>
+                <antcontrib:else>
+                    <echo>Create ${exec.dir} ... </echo>
+                    <mkdir dir="${exec.dir}"/>
+                </antcontrib:else>
+        </antcontrib:if>   
+        <antcontrib:if>
+            <available file="${tool.dir}"/>
+                <antcontrib:then>
+                    <echo>${toold.dir} exist ...</echo>
+                    <touch file="${tool.dir}/ok"/>           
+                </antcontrib:then>
+                <antcontrib:else>
+                    <echo>Create ${tool.dir} ... </echo>
+                    <mkdir dir="${tool.dir}"/>
+                </antcontrib:else>
+        </antcontrib:if>     
     </target>
-    
-    
-    
     
     <!-- ######################## mercurial clone/update ############################## -->
     
@@ -313,13 +373,10 @@
        <checkandclone project="bibimainapp"/>
     </target>
     
-    
     <macrodef name="checkandclone" description="clone / update mercurial">
         <attribute name="project"/>
         <attribute name="url" default="ssh://hg@hg.cebitec.uni-bielefeld.de"/>
-        <attribute name="path" default="/bibiadm/bibiserv2/main"/>
-        
-        
+        <attribute name="path" default="/bibiadm/bibiserv2/main"/>  
         <sequential>
             <antcontrib:if>
                 <available file="@{project}"/>     
@@ -385,7 +442,7 @@
             <antcontrib:if>
                 <available file="@{depdir}"/>
                 <antcontrib:then>
-                    <echo>found previous ${depdir} installation ...</echo>
+                    <echo>found previous @{depdir} installation ...</echo>
                 </antcontrib:then>
                 <antcontrib:else>
                     <unzip src="@{resource}" dest="."/>
@@ -449,20 +506,22 @@
     <!-- ######################## help ########################### -->
     <target name="help" description="print out a help message (same as ant -p)">
         <echo>Main targets:
-
-deploy            (re)deploys bibimainapp
-help              print out a help message (same as ant -p)
-install.antlib    install needed ant libraries to ${user.home}/.ant/lib - mandatory for developer
-install.dialign   download dialign.bar and dialign.binary and deploy both
-install.guugle    download guugle.bar and guugle.binary and deploy both
-install.resource  install instantbibi as resource on bibiserv, could only be run with developer version from mercurial repository
-instant           create/configure GF, deploys bibimainapp using stable resources
-instant.dev       setup a complete BiBiServ2 environment using latest developer resources from mercurial repository!
-start             start glassfish/database and deploys bibimainapp
-stop              stops glassfish and database
-update.dev        updates appserver_config, bibimainapp, base from mercurial
-wipe              stops GF and clean up domain including spool and exec dir!
-wipe.all          depends on wipe and remove install directories
+ deploy            (re)deploys bibimainapp
+ help              print out a help message (same as ant -p)
+ install.antlib    install needed ant libraries to ${user.home}/.ant/lib - mandatory for developer
+ install.dialign   download dialign.bar and dialign.binary and deploy both
+ install.guugle    download guugle.bar and guugle.binary and deploy both
+ install.resource  install instantbibi as resource on bibiserv, could only be run with developer 
+                   version from mercurial repository
+ instant           create/configure GF, deploys bibimainapp using stable resources
+ instant.dev       setup a complete BiBiServ2 environment using latest developer resources from 
+                   mercurial repository!
+ showconfig        shows current configuration
+ start             start glassfish/database and deploys bibimainapp
+ stop              stops glassfish and database
+ update.dev        updates appserver_config, bibimainapp, base from mercurial
+ wipe              stops GF and clean up domain including spool and exec dir!
+ wipe.all          depends on wipe and remove install directories
 
 Default target: help
 
@@ -491,13 +550,14 @@ and .vol/bibiserv2 as base dir.
     </target> 
     
     <!-- ######################## tools ########################### -->
-    <target name="install.guugle" description="download guugle.bar and guugle.binary and deploy both" depends=".resolve">
+    <target name="install.guugle" description="download guugle.bar and guugle.binary and deploy both" depends=".config.setting,.resolve">
         <install.tool name="guugle"/>
     </target>
     
-    <target name="install.dialign" description="download dialign.bar and dialign.binary and deploy both" depends=".resolve">
+    <target name="install.dialign" description="download dialign.bar and dialign.binary and deploy both" depends=".config.setting,.resolve">
         <install.tool name="dialign"/>
     </target>
+   
    
     <macrodef name="install.tool" description="deploy a tool on server and install binaries into server tools dir">
        <attribute name="name"/>
@@ -512,10 +572,14 @@ and .vol/bibiserv2 as base dir.
            <mkdir dir=".tmp.@{name}"/>
            <get src="${bibiserv_url}/resources/apps/@{name}.bar" dest=".tmp.@{name}"/>
            <get src="${bibiserv_url}/resources/apps/@{name}.${os}.${arch}.zip" dest=".tmp.@{name}"/>
-           
            <!-- unzip bin to tools.dir -->
            <unzip src=".tmp.@{name}/@{name}.${os}.${arch}.zip" dest="${exec.dir}"/>
-           
+           <!-- fits permissions -->
+           <chmod perm="ugo+x">
+               <fileset dir="${exec.dir}">
+                   <include name="**/*"/>
+               </fileset>
+           </chmod>
            <!-- deploy bar archive to server -->
             <java classname="de.unibi.cebitec.bibiserv.client.manager.ManagerClient" fork="true">
                         <classpath>
@@ -526,10 +590,7 @@ and .vol/bibiserv2 as base dir.
                         <arg value="deploy"/>
                 <arg value=".tmp.@{name}/@{name}.bar"/>
              </java>
-
-           
        </sequential>
-       
     </macrodef>
     
     <!-- ######################## ivy dependencies ########################### -->
