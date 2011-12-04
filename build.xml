@@ -92,6 +92,8 @@
     
     <target name="instant.dev" description="setup a complete BiBiServ2 environment using latest developer resources from mercurial repository!">
         <antcall target=".mercurial"/>
+        <antcall target=".get.glassfish"/>
+        <antcall target=".unzip.glassfish"/>
         <antcall target=".create.config"/>
         <antcall target=".create.domain"/>
         <antcall target="start"/>
@@ -192,15 +194,18 @@
         <delete dir="${exec.dir}"/>
         <delete dir="${base.dir}/bibidomain"/>
         <delete dir="${tools.dir}"/>
-        <delete dir="." includes=".tmp.*"/>
-        <delete file="instant.config"/>   
+        <delete dir="lib"/>
+        <delete dir="." includes=".tmp.*/**"/>
+        <delete file="instant.config"/>
     </target>
     
     <target name="wipe.all" depends="wipe" description="depends on wipe and remove install directories">
         <delete dir="appserver_config"/>
         <delete dir="glassfish3"/>
         <delete dir="base"/>
+        <delete dir="bibimainapp" failonerror="no"/>
     </target>
+    
     
     
     
@@ -355,7 +360,7 @@
         <antcontrib:if>
             <available file="${tool.dir}"/>
                 <antcontrib:then>
-                    <echo>${toold.dir} exist ...</echo>
+                    <echo>${tool.dir} exist ...</echo>
                     <touch file="${tool.dir}/ok"/>           
                 </antcontrib:then>
                 <antcontrib:else>
@@ -409,7 +414,7 @@
     
     <!-- ######################## unzip downloaded sources  ########################### -->
     
-    <target name=".unzip" >
+    <target name=".unzip" depends=".get">
         <!-- glassfish -->
         <unzipResource resource=".cache/glassfish-3.1.1.zip" depdir="glassfish3"/>
         <chmod perm="ugo+rx" file="glassfish3/bin/asadmin"/>
@@ -420,19 +425,10 @@
         <unzipResource resource=".cache/base.zip" depdir="base"/>
     </target>
            
-    <target name=".unzip.glassfish" depends=".get">            
-        <available file="glassfish3/bin/asadmin" property="gf.present"/>    
-        <antcontrib:if>
-             <isset property="gf.present"/>
-            <antcontrib:then>
-                <echo>found previous glassfish3 installation ...</echo>    
-            </antcontrib:then>
-            <antcontrib:else>
-                <unzip src=".cache/glassfish.zip" dest="."/>     
-                <chmod perm="ugo+rx" file="glassfish3/bin/asadmin"/>
-                <chmod perm="ugo+rx" file="glassfish3/javadb/bin/ij"/>        
-            </antcontrib:else>
-        </antcontrib:if>
+    <target name=".unzip.glassfish">                  
+        <unzipResource resource=".cache/glassfish-3.1.1.zip" depdir="glassfish3"/>
+        <chmod perm="ugo+rx" file="glassfish3/bin/asadmin"/>
+        <chmod perm="ugo+rx" file="glassfish3/javadb/bin/ij"/>   
     </target>
     
     <macrodef name="unzipResource">
@@ -452,12 +448,15 @@
     </macrodef>
     
     <!-- ######################## targets to download sources from server ########################### -->  
-    <target name=".get">
+    <target name=".get" depends=".get.glassfish">
         <checkAndDownload resource="bibimainapp.war" url="${bibiserv_url}/resources"/>
         <checkAndDownload resource="appserver_config.zip" url="${bibiserv_url}/resources"/>
-        <checkAndDownload resource="base.zip" url="${bibiserv_url}/resources"/>
-        <checkAndDownload resource="glassfish-3.1.1.zip" url="${glassfish_url}" checksum="bf92c2c99b3d53b83bbc8c7e2124a897"/>
+        <checkAndDownload resource="base.zip" url="${bibiserv_url}/resources"/> 
     </target> 
+    
+    <target name=".get.glassfish">
+        <checkAndDownload resource="glassfish-3.1.1.zip" url="${glassfish_url}" checksum="bf92c2c99b3d53b83bbc8c7e2124a897"/>
+    </target>
       
     <macrodef name="checkAndDownload"
         description="check if a resource is cached and up to date, otherwise download it from given url">
