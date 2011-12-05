@@ -221,7 +221,7 @@
             <antcontrib:else>
                 <property name="portbase" value="8000"/>
                 <setPorts portbase="${portbase}"/>
-                <property name="base.dir" value="/tmp/${user.home}"/>
+                <property name="base.dir" value="/tmp/${user.name}"/>
                 <property name="spool.dir" value="${base.dir}/spool"/>
                 <property name="exec.dir" value="${base.dir}/bin"/>
                 <property name="tool.dir" value="${base.dir}/gentools"/>
