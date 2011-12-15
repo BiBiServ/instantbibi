@@ -83,6 +83,8 @@
        
         <antcall target=".get"/>
         <antcall target=".unzip"/>
+        <antcall target=".get.glassfish"/>
+        <antcall target=".unzip.glassfish"/>
         <antcall target=".create.config"/>
         <antcall target=".create.domain"/>
         <antcall target="start"/>
@@ -414,11 +416,7 @@
     
     <!-- ######################## unzip downloaded sources  ########################### -->
     
-    <target name=".unzip" depends=".get">
-        <!-- glassfish -->
-        <unzipResource resource=".cache/glassfish-3.1.1.zip" depdir="glassfish3"/>
-        <chmod perm="ugo+rx" file="glassfish3/bin/asadmin"/>
-        <chmod perm="ugo+rx" file="glassfish3/javadb/bin/ij"/>
+    <target name=".unzip">
         <!-- appserver config -->
         <unzipResource resource=".cache/appserver_config.zip" depdir="appserver_config"/>
         <!-- base -->
@@ -448,15 +446,16 @@
     </macrodef>
     
     <!-- ######################## targets to download sources from server ########################### -->  
-    <target name=".get" depends=".get.glassfish">
+    <target name=".get">
         <checkAndDownload resource="bibimainapp.war" url="${bibiserv_url}/resources"/>
         <checkAndDownload resource="appserver_config.zip" url="${bibiserv_url}/resources"/>
-        <checkAndDownload resource="base.zip" url="${bibiserv_url}/resources"/> 
+        <checkAndDownload resource="base.zip" url="${bibiserv_url}/resources" />
+        
     </target> 
     
     <target name=".get.glassfish">
         <checkAndDownload resource="glassfish-3.1.1.zip" url="${glassfish_url}" checksum="bf92c2c99b3d53b83bbc8c7e2124a897"/>
-    </target>
+    </target> 
       
     <macrodef name="checkAndDownload"
         description="check if a resource is cached and up to date, otherwise download it from given url">
@@ -464,6 +463,8 @@
         <attribute name="url"/>
         <attribute name="checksum" default=""/>
         <sequential>
+            <local name="local.md5"/>
+            <local name="url.md5"/>
             <antcontrib:if>
                 <available file=".cache/@{resource}"/>
                 <antcontrib:then>
