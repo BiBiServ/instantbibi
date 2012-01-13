@@ -74,7 +74,7 @@
         <echo>db port    : ${db.port}</echo>
         <echo>admin port : ${admin.port}</echo>
         <echo>http port  : ${http.port}</echo>
-        <echo>htpps port : ${https.port}</echo>
+        <echo>https port : ${https.port}</echo>
     </target>
     
     
@@ -85,8 +85,10 @@
         <antcall target=".unzip"/>
         <antcall target=".get.glassfish"/>
         <antcall target=".unzip.glassfish"/>
+        <antcall target=".get.modules"/>
         <antcall target=".create.config"/>
         <antcall target=".create.domain"/>
+        <antcall target=".add.modules"/>
         <antcall target="start"/>
         <antcall target="showconfig"/>
     </target>
@@ -96,8 +98,10 @@
         <antcall target=".mercurial"/>
         <antcall target=".get.glassfish"/>
         <antcall target=".unzip.glassfish"/>
+        <antcall target=".get.modules"/>
         <antcall target=".create.config"/>
         <antcall target=".create.domain"/>
+        <antcall target=".add.modules"/>
         <antcall target="start"/>
         <antcall target="showconfig"/>
     </target>
@@ -148,6 +152,7 @@
         </copy>
     </target>
   
+    
     <target name="start" description="start glassfish/database and deploys bibimainapp">
         <ant antfile="build.xml" target="start" dir="appserver_config"/>
         <antcall target="deploy"/>
@@ -212,6 +217,28 @@
     
     
     <!-- ######################## create and configure new domain   ########################### -->
+
+    <target name=".add.modules">
+        <ant antfile="build.xml" target="_start_db" dir="appserver_config">
+            <property name="ant.library.path" value="${ant.lib.path}"/>
+        </ant>
+        
+        <loadresource property="modullist">
+            <file file=".cache/modules.txt"/>
+        </loadresource>
+        <antcontrib:for list="${modullist}" param="module" delimiter="${line.separator}">
+            <sequential>
+                <echo>add module "@{module}"</echo>
+                <ant antfile="build.xml" target="install.module" dir="appserver_config">
+                    <property name="module" value="${basedir}/.cache/@{module}"/>
+                </ant>
+            </sequential>
+        </antcontrib:for>    
+        <ant antfile="build.xml" target="_stop_db" dir="appserver_config">
+            <property name="ant.library.path" value="${ant.lib.path}"/>
+        </ant>
+    </target>
+
 
     <target name=".config.setting">
         <antcontrib:if>
@@ -450,12 +477,24 @@
         <checkAndDownload resource="bibimainapp.war" url="${bibiserv_url}/resources"/>
         <checkAndDownload resource="appserver_config.zip" url="${bibiserv_url}/resources"/>
         <checkAndDownload resource="base.zip" url="${bibiserv_url}/resources" />
-        
     </target> 
     
     <target name=".get.glassfish">
         <checkAndDownload resource="glassfish-3.1.1.zip" url="${glassfish_url}" checksum="bf92c2c99b3d53b83bbc8c7e2124a897"/>
     </target> 
+    
+    <target name=".get.modules">
+        <get src="${bibiserv_url}/resources/modules/modules.txt" dest=".cache/modules.txt"/>
+        <loadresource property="modullist">
+            <file file=".cache/modules.txt"/>
+        </loadresource>
+        <antcontrib:for list="${modullist}" param="module" delimiter="${line.separator}">
+            <sequential>
+                <echo>@{module}</echo>
+                <checkAndDownload resource="@{module}" url="${bibiserv_url}/resources/modules"/>
+            </sequential>
+        </antcontrib:for>
+    </target>
       
     <macrodef name="checkAndDownload"
         description="check if a resource is cached and up to date, otherwise download it from given url">
