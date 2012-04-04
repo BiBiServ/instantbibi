@@ -2,7 +2,7 @@
 <!-- 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
     
-    Copyright 2011 BiBiServ Curator Team, http://bibiserv.cebitec.uni-bielefeld.de,
+    Copyright 2011-2012 BiBiServ Curator Team, http://bibiserv.cebitec.uni-bielefeld.de,
     All rights reserved.
     
     The contents of this file are subject to the terms of the Common
@@ -16,7 +16,7 @@
     below the License Header, with the fields enclosed by brackets [] replaced
     by your own identifying information:
     
-    "Portions Copyrighted 2011 BiBiServ Curator Team, http://bibiserv.cebitec.uni-bielefeld.de"
+    "Portions Copyrighted 2011-2012 BiBiServ Curator Team, http://bibiserv.cebitec.uni-bielefeld.de"
     
     Contributor(s): Jan Krueger
     
@@ -151,8 +151,21 @@
             <fileset dir=".ant/lib" includes="*.jar"/>
         </copy>
     </target>
-  
     
+    <target name="install.wizard" depends=".config.setting" description="(re)deploys bibiserv2 wizard, application server must be running."> 
+        <checkAndDownload resource="Wizard2011.war" url="${bibiserv_url}/resources"/>
+                <exec executable="${basedir}/glassfish3/bin/asadmin" failifexecutionfails="true" failonerror="true">
+                    <arg value="--user=admin"/>
+                    <arg value="--passwordfile=appserver_config/local.passwordfile"/>
+                    <arg value="--port=${admin.port}"/>
+                    <arg value="--host=localhost"/>
+                    <arg value="deploy"/>
+                    <arg value="--force"/>
+                    <arg value="--contextroot=/"/>
+                    <arg value=".cache/Wizard2011.war"/>       
+                </exec>
+    </target>
+  
     <target name="start" description="start glassfish/database and deploys bibimainapp">
         <ant antfile="build.xml" target="start" dir="appserver_config"/>
         <antcall target="deploy"/>
@@ -475,6 +488,7 @@
     <!-- ######################## targets to download sources from server ########################### -->  
     <target name=".get">
         <checkAndDownload resource="bibimainapp.war" url="${bibiserv_url}/resources"/>
+        
         <checkAndDownload resource="appserver_config.zip" url="${bibiserv_url}/resources"/>
         <checkAndDownload resource="base.zip" url="${bibiserv_url}/resources" />
     </target> 
@@ -552,6 +566,7 @@
  install.guugle    download guugle.bar and guugle.binary and deploy both
  install.resource  install instantbibi as resource on bibiserv, could only be run with developer 
                    version from mercurial repository
+ install.wizard    (re)deploys the bibiserv2 wizard on glassfish
  instant           create/configure GF, deploys bibimainapp using stable resources
  instant.dev       setup a complete BiBiServ2 environment using latest developer resources from 
                    mercurial repository!
