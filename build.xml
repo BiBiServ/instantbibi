@@ -122,6 +122,8 @@
                     <zipfileset file="README.1st" prefix="instantbibi"/>
                 </zip>
                 
+                <checksum algorithm="md5" file="dist/instantbibi.zip" format="CHECKSUM"/>
+                
                 <!-- check if ${ssh.key} and ${ssh.user} is set -->
                 <fail unless="ssh.user"
                     message="The Target &lt;install&gt; uses ssh key based authentication. Give the ssh user for ${ssh.host} as property 'ssh.user' as argument to the ant call!"/>
@@ -136,6 +138,7 @@
                 <scp todir="${ssh.user}@${ssh.host}:${ssh.basedir}/resources" passphrase="${ssh.passphrase}"
                     keyfile="${ssh.key}">
                     <fileset file="dist/instantbibi.zip"/>
+                    <fileset file="dist/instantbibi.zip.md5"/>
                 </scp>
             </antcontrib:then>
             <antcontrib:else>
@@ -161,7 +164,7 @@
                     <arg value="--host=localhost"/>
                     <arg value="deploy"/>
                     <arg value="--force"/>
-                    <arg value="--contextroot=/"/>
+                    <arg value="--contextroot=/wizard"/>
                     <arg value=".cache/Wizard2011.war"/>       
                 </exec>
     </target>
