@@ -207,7 +207,16 @@
     </target>
     
     <target name="stop" description="stops glassfish and database">
-        <ant antfile="build.xml" target="stop"  dir="appserver_config" />
+        <antcontrib:if>
+            <available file="appserver_config/local.configuration"/>
+            <antcontrib:then>
+                <ant antfile="build.xml" target="stop"  dir="appserver_config" />
+            </antcontrib:then>
+            <antcontrib:else>
+                <echo>No configuration found ... skip stopping glassfish and database</echo>
+            </antcontrib:else>
+        </antcontrib:if>
+        
     </target>
     
     
