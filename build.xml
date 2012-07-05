@@ -50,7 +50,7 @@
     <!-- following properties can be overwritten calling ant with -Dpropertyname=propertyvalue --> 
     
     <property name="bibiserv_url" value="http://bibiserv.cebitec.uni-bielefeld.de"/>
-    <property name="glassfish_url" value="http://download.java.net/glassfish/3.1.1/release"/>
+    <property name="glassfish_url" value="http://download.java.net/glassfish/3.1.2/release"/>
     <property name="ant.lib.path" refid="antlib"/> <!-- for external ant calls -->
     
     <!-- Script to calculate the java db port and set the variable ${db.port} from the given portbase -->
@@ -476,7 +476,7 @@
     </target>
            
     <target name=".unzip.glassfish">                  
-        <unzipResource resource=".cache/glassfish-3.1.1.zip" depdir="glassfish3"/>
+        <unzipResource resource=".cache/glassfish-3.1.2.zip" depdir="glassfish3"/>
         <chmod perm="ugo+rx" file="glassfish3/bin/asadmin"/>
         <chmod perm="ugo+rx" file="glassfish3/javadb/bin/ij"/>   
     </target>
@@ -506,7 +506,7 @@
     </target> 
     
     <target name=".get.glassfish">
-        <checkAndDownload resource="glassfish-3.1.1.zip" url="${glassfish_url}" checksum="bf92c2c99b3d53b83bbc8c7e2124a897"/>
+        <checkAndDownload resource="glassfish-3.1.2.zip" url="${glassfish_url}" checksum="a3a566302aa7bf20dcd44b9c79492680"/>
     </target> 
     
     <target name=".get.modules">

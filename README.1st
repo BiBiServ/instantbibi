@@ -30,10 +30,10 @@ these ant extensions to your local ant lib extension folder (which is normally
 $HOME/.ant/lib). The ant task 'install.antlib' provide this functionality.
 
 These configuration script was tested on :
-Solaris X64
+Solaris 10 - X64
 Linux X86 (Ubuntu 10.04/Amazon EC2 Linux)
-Linux X64 (Ubuntu 10.04/11.10/Amazon EC2 Linux)
-OSX 10.6 (running jdk 6)
+Linux X64 (Ubuntu 10.04/11.10/12.04/Amazon EC2 Linux)
+OSX (10.6/10.7) (running jdk 6)
 
 About 1 GB of free RAM is needed to run a BiBiServ2 instance with acceptable performance.
 
