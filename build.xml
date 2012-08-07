@@ -42,10 +42,31 @@
     <taskdef uri="antlib:org.apache.ivy.ant"
              resource="org/apache/ivy/ant/antlib.xml"
              classpathref="antlib"/>
-               
-   <!-- environment variables -->
+             
+
     
+    <!-- getting access to environment vars -->
     <property environment="env"/>
+    
+    <!--  build conditions/dependencies -->
+    
+    <fail
+        message="At least Java 7 is needed to compile '${ant.project.name}'. You are running ${java.version}, ${java.specification.version}, ${java.specification.name}">
+        <condition>
+            <not>
+                <or>
+                    <!-- any Java 7 release is supported -->
+                    <equals arg1="${java.specification.version}" arg2="1.7" trim="yes"
+                        casesensitive="no"/>
+                    <!-- upcoming Java 8 release also supported -->
+                    <equals arg1="${java.specification.version}" arg2="1.8" trim="yes"
+                        casesensitive="no"/>
+                </or>
+            </not>
+        </condition>
+    </fail>
+    
+
     
     <!-- following properties can be overwritten calling ant with -Dpropertyname=propertyvalue --> 
     
