@@ -127,6 +127,13 @@
         <antcall target="showconfig"/>
     </target>
     
+    <target name="rebuild.domain" depends="wipe.domain" description="rebuilds domain using previous configuration (if exists), depends on wipe.light">  
+        <antcall target=".create.domain"/>
+        <antcall target=".add.modules"/>
+        <antcall target="start"/>
+        <antcall target="showconfig"/>
+    </target>
+    
     <target name="update.dev" description="updates appserver_config, bibimainapp, base from mercurial" depends=".mercurial"/>
     
     <target name="install.resource" description="install instantbibi as resource on bibiserv, could only be run with developer version from mercurial repository">
@@ -240,19 +247,21 @@
         
     </target>
     
-    
-    
-    <target name="wipe" depends=".config.setting, stop" description="stops GF and clean up domain including spool and exec dir!" >
+    <target name="wipe.domain" depends=".config.setting, stop" description="stops GF and clean up domain including spool and exec dir"> 
         <delete dir="${spool.dir}"/>
         <delete dir="${exec.dir}"/>
         <delete dir="${base.dir}/bibidomain"/>
-        <delete dir="${tools.dir}"/>
+        <delete dir="${tools.dir}"/> 
+    </target>
+    
+    
+    <target name="wipe" depends="wipe.domain" description="depends on wipe.domain and additional clean up domain configuration!" >    
         <delete dir="lib"/>
         <delete dir="." includes=".tmp.*/**"/>
         <delete file="instant.config"/>
     </target>
     
-    <target name="wipe.all" depends="wipe" description="depends on wipe and remove install directories">
+    <target name="wipe.all" depends="wipe" description="depends on wipe and additional remove all install directories">
         <delete dir="appserver_config"/>
         <delete dir="glassfish3"/>
         <delete dir="base"/>
