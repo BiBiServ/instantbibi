@@ -303,6 +303,8 @@
                 <loadproperties srcFile="instant.config"/>
             </antcontrib:then>
             <antcontrib:else>
+                <!-- create new configuration, remove possible existing configuration ind appserver_config -->
+                <delete file="appserver_config/local.configuration" failonerror="no"/>
                 <property name="portbase" value="8000"/>
                 <setPorts portbase="${portbase}"/>
                 <property name="base.dir" value="/tmp/${user.name}"/>
