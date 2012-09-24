@@ -395,13 +395,15 @@
                 <move file="${user.home}/.bibiserv2_manager" tofile="${user.home}/.bibiserv2_manager.${CURRENT}" failonerror="false"/>
                 <propertyfile file="${user.home}/.bibiserv2_manager">
                     <entry key="role" value="testadmin"/>
-                    <entry key="password" value="simplepassword"/>
+                    <entry key="password" value="b9dfac81fa1e0516aab7feef882c1f97d13ca2cc"/> <!-- sha1 : simplepassword -->
                     <entry key="port" value="${http.port}"/>
                     <entry key="server" value="localhost"/>
                 </propertyfile>
             </antcontrib:then>
         </antcontrib:if>
     </target>
+    
+
     
     <target name=".check"> 
         <antcontrib:if>
