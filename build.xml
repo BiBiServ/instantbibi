@@ -2,7 +2,7 @@
 <!-- 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
     
-    Copyright 2011-2012 BiBiServ Curator Team, http://bibiserv.cebitec.uni-bielefeld.de,
+    Copyright 2011-2013 BiBiServ Curator Team, http://bibiserv.cebitec.uni-bielefeld.de,
     All rights reserved.
     
     The contents of this file are subject to the terms of the Common
@@ -16,7 +16,7 @@
     below the License Header, with the fields enclosed by brackets [] replaced
     by your own identifying information:
     
-    "Portions Copyrighted 2011-2012 BiBiServ Curator Team, http://bibiserv.cebitec.uni-bielefeld.de"
+    "Portions Copyrighted 2011-2013 BiBiServ Curator Team, http://bibiserv.cebitec.uni-bielefeld.de"
     
     Contributor(s): Jan Krueger
     
@@ -85,6 +85,17 @@
     ]]>
     </scriptdef>
 
+
+    <!-- get information about host -->
+    <hostinfo prefix="hostinfo"/>
+    
+    <target name="hostinfo" description="print information about host">
+        <echo>NAME   - ${hostinfo.NAME}</echo>
+        <echo>DOMAIN - ${hostinfo.DOMAIN}</echo>
+        <echo>IPv4   - ${hostinfo.ADDR4}</echo>
+        <echo>IPv6   - ${hostinfo.ADDR6}</echo>
+    </target>
+
     <target name="showconfig" description="shows current configuration" depends=".config.setting">
         <echo>Current configuration:</echo>
         <echo>base dir   : ${base.dir}</echo>
@@ -92,10 +103,13 @@
         <echo>exec dir   : ${exec.dir}</echo>
         <echo>tool dir   : ${tool.dir}</echo>
         <echo>portbase   : ${portbase}</echo>
+        <echo>db host    : ${db.host}</echo>
+        <echo>db user    : ${db.user}</echo>
         <echo>db port    : ${db.port}</echo>
         <echo>admin port : ${admin.port}</echo>
         <echo>http port  : ${http.port}</echo>
         <echo>https port : ${https.port}</echo>
+        
     </target>
     
     
@@ -307,6 +321,16 @@
                 <delete file="appserver_config/local.configuration" failonerror="no"/>
                 <property name="portbase" value="8000"/>
                 <setPorts portbase="${portbase}"/>
+                <!-- db host -->
+                <property name="db.host"  value="${hostinfo.NAME}"/>
+                <!-- db user -->
+                <property name="db.user" value="bibiserv2"/>
+                <!-- db pwd -->
+                <script language="javascript">
+                    <![CDATA[
+    property = project.setProperty("db.pwd","db_"+Math.floor((new Date()).getTime()/1000));
+  ]]>
+                </script>
                 <property name="base.dir" value="/tmp/${user.name}"/>
                 <property name="spool.dir" value="${base.dir}/spool"/>
                 <property name="exec.dir" value="${base.dir}/bin"/>
@@ -320,8 +344,14 @@
                     <entry key="base.dir" value="${base.dir}"/>
                     <entry key="spool.dir" value="${spool.dir}"/>
                     <entry key="exec.dir" value="${exec.dir}"/>
-                    <entry key="tool.dir" value="${tool.dir}"/>            
+                    <entry key="tool.dir" value="${tool.dir}"/>
+                    <entry key="db.host"  value="${db.host}"/>
+                    <entry key="db.user" value="${db.user}"/>
+                    <entry key="db.pwd" value="${db.pwd}"/>
                 </propertyfile>
+                <!-- change permission -->
+                <chmod file="instant.config" perm="600"/>
+                
             </antcontrib:else>
         </antcontrib:if>
     </target>
@@ -348,6 +378,7 @@
             </not>
             <antcontrib:then>
                 <echo>create configuration </echo>
+                <!-- local configuration -->
                 <propertyfile file="appserver_config/local.configuration">
                     <entry key="catalina.home" value="${basedir}/glassfish3"/>
                     <entry key="domain.dir" value="${base.dir}"/>
@@ -358,11 +389,20 @@
                     <entry key="server.portbase" value="${portbase}"/>
                     <entry key="db.port" value="${db.port}"/>
                     <entry key="admin.port" value="${admin.port}"/>
+                    <entry key="db.host"  value="${db.host}"/>
+                    <entry key="db.user" value="${db.user}"/>
+                    <entry key="db.pwd" value="${db.pwd}"/>
                 </propertyfile>
+                <!-- change permission on local.configuration file -->
+                <chmod file="appserver_config/local.passwordfile" perm="600"/>
+                <!-- local passwordfile -->
                 <propertyfile file="appserver_config/local.passwordfile">
                     <entry key="AS_ADMIN_PASSWORD" value="admin"/>
                     <entry key="AS_ADMIN_MASTERPASSWORD" value="changeit"/>
                 </propertyfile>
+                <!-- change permission on password file -->
+                <chmod file="appserver_config/local.passwordfile" perm="600"/>
+                
             </antcontrib:then>
             <antcontrib:else>
                 <echo>found previous configuration ...</echo>
