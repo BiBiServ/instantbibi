@@ -436,8 +436,9 @@
                 <propertyfile file="${user.home}/.bibiserv2_manager">
                     <entry key="role" value="testadmin"/>
                     <entry key="password" value="b9dfac81fa1e0516aab7feef882c1f97d13ca2cc"/> <!-- sha1 : simplepassword -->
-                    <entry key="port" value="${http.port}"/>
+                    <entry key="port" value="${https.port}"/>
                     <entry key="server" value="localhost"/>
+                    <entry key="ssl" value="true"/>
                 </propertyfile>
             </antcontrib:then>
         </antcontrib:if>
