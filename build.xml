@@ -263,7 +263,7 @@
     
     <target name="wipe.domain" depends=".config.setting, stop" description="stops GF and clean up domain including spool and exec dir"> 
         <delete dir="${spool.dir}"/>
-        <delete dir="${exec.dir}"/>
+        <!-- <delete dir="${exec.dir}"/> -->
         <delete dir="${base.dir}/bibidomain"/>
         <delete dir="${tools.dir}"/> 
     </target>
