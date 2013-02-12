@@ -322,7 +322,14 @@
                 <property name="portbase" value="8000"/>
                 <setPorts portbase="${portbase}"/>
                 <!-- db host -->
-                <property name="db.host"  value="${hostinfo.NAME}"/>
+                <antcontrib:if>
+                    <not>
+                        <isset property="db.host"/>
+                    </not>
+                    <antcontrib:then>
+                        <property name="db.host"  value="${hostinfo.NAME}"/>
+                    </antcontrib:then>
+                </antcontrib:if>
                 <!-- db user -->
                 <property name="db.user" value="bibiserv2"/>
                 <!-- db pwd -->
