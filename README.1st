@@ -16,8 +16,8 @@ An 'ant instant' setup up the server using the system default (portbase 8000,
 base.dir /tmp/${user} ). The default can be simple overwritten, a 
 'ant instant -Dbase.dir=/my/base/dir' for example changes the base.dir to /my/base/dir.
 
-The InstantBiBi comes also with support for a (growing) variety of tools for 4 different
-os/platform combinations (Solaris X86_64, Linux X86, Linux X86_64 and OSX 10.6).
+The InstantBiBi comes also with support for a (growing) variety of tools for 3 different
+os/platform combinations (Linux X86, Linux X86_64 and OSX 10.8).
 
 To install a tool just call 'ant install.<toolid>'. After a successful call the tool
 is available via http://..../<TOOLID>, but NOT linked on the left side menu.
@@ -30,12 +30,12 @@ these ant extensions to your local ant lib extension folder (which is normally
 $HOME/.ant/lib). The ant task 'install.antlib' provide this functionality.
 
 These configuration script was tested on :
-Solaris 10 - X64
+Solaris 10/11 - X64
 Linux X86 (Ubuntu 10.04/Amazon EC2 Linux)
 Linux X64 (Ubuntu 10.04/11.10/12.04/Amazon EC2 Linux)
-OSX (10.6/10.7) (running jdk 6)
+OSX (10.7/10.8) (running jdk 7)
 
 About 1 GB of free RAM is needed to run a BiBiServ2 instance with acceptable performance.
 
-The BiBiServ Team - 12/02/2011
+The BiBiServ Team - 12/02/2011 (updated 06/13/2013)
 
