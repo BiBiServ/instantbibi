@@ -121,9 +121,10 @@
         <antcall target=".get.glassfish"/>
         <antcall target=".unzip.glassfish"/>
         <antcall target=".get.modules"/>
+        <antcall target=".get.items"/>
         <antcall target=".create.config"/>
         <antcall target=".create.domain"/>
-        <antcall target=".add.modules"/>
+        <antcall target=".add.parts"/>
         <antcall target="start"/>
         <antcall target="showconfig"/>
     </target>
@@ -134,16 +135,17 @@
         <antcall target=".get.glassfish"/>
         <antcall target=".unzip.glassfish"/>
         <antcall target=".get.modules"/>
+        <antcall target=".get.items"/>
         <antcall target=".create.config"/>
         <antcall target=".create.domain"/>
-        <antcall target=".add.modules"/>
+        <antcall target=".add.parts"/>
         <antcall target="start"/>
         <antcall target="showconfig"/>
     </target>
     
     <target name="rebuild.domain" depends="wipe.domain" description="rebuilds domain using previous configuration (if exists), depends on wipe.light">  
         <antcall target=".create.domain"/>
-        <antcall target=".add.modules"/>
+        <antcall target=".add.parts"/>
         <antcall target="start"/>
         <antcall target="showconfig"/>
     </target>
@@ -296,11 +298,21 @@
     
     <!-- ######################## create and configure new domain   ########################### -->
 
-    <target name=".add.modules">
+    <target name=".add.parts">
         <ant antfile="build.xml" target="_start_db" dir="appserver_config">
             <property name="ant.library.path" value="${ant.lib.path}"/>
         </ant>
         
+        <antcall target=".add.modules"/>
+        <antcall target=".add.items"/>
+        
+        
+        <ant antfile="build.xml" target="_stop_db" dir="appserver_config">
+            <property name="ant.library.path" value="${ant.lib.path}"/>
+        </ant>
+    </target>
+
+    <target name=".add.modules">
         <loadresource property="modullist">
             <file file=".cache/modules.txt"/>
         </loadresource>
@@ -312,9 +324,21 @@
                 </ant>
             </sequential>
         </antcontrib:for>    
-        <ant antfile="build.xml" target="_stop_db" dir="appserver_config">
-            <property name="ant.library.path" value="${ant.lib.path}"/>
-        </ant>
+    </target>
+
+    <target name=".add.items">
+        <loadresource property="itemlist">
+            <file file=".cache/items.txt"/>
+        </loadresource>
+        <antcontrib:for list="${itemlist}" param="item" delimiter="${line.separator}">
+            <sequential>
+                <echo>add item "@{item}"</echo>
+                <ant antfile="build.xml" target="install.item" dir="appserver_config">
+                    <property name="item" value="${basedir}/.cache/@{item}"/>
+                </ant>
+            </sequential>
+        </antcontrib:for>  
+        
     </target>
 
 
@@ -567,7 +591,7 @@
     </target>
            
     <target name=".unzip.glassfish">                  
-        <unzipResource resource=".cache/glassfish-3.1.2.zip" depdir="glassfish3"/>
+        <unzipResource resource=".cache/glassfish-3.1.2.2.zip" depdir="glassfish3"/>
         <chmod perm="ugo+rx" file="glassfish3/bin/asadmin"/>
         <chmod perm="ugo+rx" file="glassfish3/javadb/bin/ij"/>   
     </target>
@@ -612,6 +636,19 @@
             </sequential>
         </antcontrib:for>
     </target>
+    <target name=".get.items">
+        <get src="${bibiserv_url}/resources/items/items.txt" dest=".cache/items.txt"/>
+        <loadresource property="itemlist">
+            <file file=".cache/items.txt"/>
+        </loadresource>
+        <antcontrib:for list="${itemlist}" param="item" delimiter="${line.separator}">
+            <sequential>
+                <echo>@{item}</echo>
+                <checkAndDownload resource="@{item}" url="${bibiserv_url}/resources/items"/>
+            </sequential>
+        </antcontrib:for>
+    </target>
+    
       
     <macrodef name="checkAndDownload"
         description="check if a resource is cached and up to date, otherwise download it from given url">
