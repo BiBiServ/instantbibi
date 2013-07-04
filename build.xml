@@ -201,14 +201,14 @@
     
     <target name="install.wizard" depends=".config.setting" description="(re)deploys bibiserv2 wizard, application server must be running."> 
         <checkAndDownload resource="Wizard2011.war" url="${bibiserv_url}/resources"/>
-                <exec executable="${basedir}/glassfish3/bin/asadmin" failifexecutionfails="true" failonerror="true">
+                <exec executable="${basedir}/glassfish3/bin/asadmin" failifexecutionfails="true" failonerror="true" >
                     <arg value="--user=admin"/>
                     <arg value="--passwordfile=appserver_config/local.passwordfile"/>
                     <arg value="--port=${admin.port}"/>
                     <arg value="--host=localhost"/>
                     <arg value="deploy"/>
                     <arg value="--force"/>
-                    <arg value="--contextroot=/wizard"/>
+                    <arg value="--contextroot=/wizard"/>/
                     <arg value=".cache/Wizard2011.war"/>       
                 </exec>
     </target>
@@ -239,7 +239,7 @@
                     <arg value="--port=${admin.port}"/>
                     <arg value="--host=localhost"/>
                     <arg value="deploy"/>
-                    <arg value="--force"/>
+                    <arg value="-force"/> 
                     <arg value="--contextroot=/"/>
                     <arg value="bibimainapp/dist/bibimainapp.war"/>       
                 </exec>               
@@ -251,7 +251,7 @@
                     <arg value="--port=${admin.port}"/>
                     <arg value="--host=localhost"/>
                     <arg value="deploy"/>
-                    <arg value="--force"/>
+                    <arg value="-force"/> 
                     <arg value="--contextroot=/"/>
                     <arg value=".cache/bibimainapp.war"/>       
                 </exec>
@@ -558,10 +558,10 @@
                     <antcontrib:if>                       
                         <available file="@{project}/.hg"/>
                         <antcontrib:then>
-                            <exec executable="hg" dir="@{project}">
+                            <exec executable="hg" dir="@{project}" failifexecutionfails="true" failonerror="true">
                                 <arg value="pull"/>
                             </exec>
-                            <exec executable="hg" dir="@{project}">
+                            <exec executable="hg" dir="@{project}" failifexecutionfails="true" failonerror="true">
                                 <arg value="update"/>
                             </exec>      
                         </antcontrib:then>
@@ -571,7 +571,7 @@
                     </antcontrib:if>
                 </antcontrib:then>
                 <antcontrib:else>
-                  <exec executable="hg">
+                    <exec executable="hg" failifexecutionfails="true" failonerror="true">
                       <arg value="clone"/>
                       <arg value="@{url}/@{path}/@{project}"/>
                   </exec>
@@ -757,8 +757,8 @@ and .vol/bibiserv2 as base dir.
        <attribute name="name"/>
        <sequential>
            <!-- determine os and machine architecture -->
-           <exec executable="uname" outputproperty="os"/>
-           <exec executable="uname" outputproperty="arch">
+           <exec executable="uname" outputproperty="os" failifexecutionfails="true" failonerror="true"/>
+           <exec executable="uname" outputproperty="arch" failifexecutionfails="true" failonerror="true">
                <arg value="-m"/>
            </exec>
            
