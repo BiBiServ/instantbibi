@@ -239,7 +239,7 @@
                     <arg value="--port=${admin.port}"/>
                     <arg value="--host=localhost"/>
                     <arg value="deploy"/>
-                    <arg value="-force"/> 
+                    <arg value="--force"/> 
                     <arg value="--contextroot=/"/>
                     <arg value="bibimainapp/dist/bibimainapp.war"/>       
                 </exec>               
@@ -251,7 +251,7 @@
                     <arg value="--port=${admin.port}"/>
                     <arg value="--host=localhost"/>
                     <arg value="deploy"/>
-                    <arg value="-force"/> 
+                    <arg value="--force"/> 
                     <arg value="--contextroot=/"/>
                     <arg value=".cache/bibimainapp.war"/>       
                 </exec>
