@@ -208,7 +208,7 @@
                     <arg value="--host=localhost"/>
                     <arg value="deploy"/>
                     <arg value="--force"/>
-                    <arg value="--contextroot=/wizard"/>/
+                    <arg value="--contextroot=/wizard"/>
                     <arg value=".cache/Wizard2011.war"/>       
                 </exec>
     </target>
