@@ -2,7 +2,7 @@
 <!-- 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
     
-    Copyright 2011-2013 BiBiServ Curator Team, http://bibiserv.cebitec.uni-bielefeld.de,
+    Copyright 2011-2014 BiBiServ Curator Team, http://bibiserv.cebitec.uni-bielefeld.de,
     All rights reserved.
     
     The contents of this file are subject to the terms of the Common
@@ -16,7 +16,7 @@
     below the License Header, with the fields enclosed by brackets [] replaced
     by your own identifying information:
     
-    "Portions Copyrighted 2011-2013 BiBiServ Curator Team, http://bibiserv.cebitec.uni-bielefeld.de"
+    "Portions Copyrighted 2011-2014 BiBiServ Curator Team, http://bibiserv.cebitec.uni-bielefeld.de"
     
     Contributor(s): Jan Krueger
     
@@ -71,8 +71,9 @@
     <!-- following properties can be overwritten calling ant with -Dpropertyname=propertyvalue --> 
     
     <property name="bibiserv_url" value="http://bibiserv.cebitec.uni-bielefeld.de"/>
-    <property name="glassfish_url" value="http://download.java.net/glassfish/3.1.2.2/release"/>
+   
     <property name="ant.lib.path" refid="antlib"/> <!-- for external ant calls -->
+   
     
     <!-- Script to calculate the java db port and set the variable ${db.port} from the given portbase -->
     <scriptdef name="setPorts" language="javascript">
@@ -201,7 +202,7 @@
     
     <target name="install.wizard" depends=".config.setting" description="(re)deploys bibiserv2 wizard, application server must be running."> 
         <checkAndDownload resource="Wizard2011.war" url="${bibiserv_url}/resources"/>
-                <exec executable="${basedir}/glassfish3/bin/asadmin" failifexecutionfails="true" failonerror="true" >
+                <exec executable="${basedir}/glassfish/bin/asadmin" failifexecutionfails="true" failonerror="true" >
                     <arg value="--user=admin"/>
                     <arg value="--passwordfile=appserver_config/local.passwordfile"/>
                     <arg value="--port=${admin.port}"/>
@@ -214,7 +215,7 @@
     </target>
     
     <target name="uninstall.wizard" depends=".config.setting" description="undeploy bibiserv2 wizard">
-        <exec executable="${basedir}/glassfish3/bin/asadmin" failifexecutionfails="true" failonerror="true">
+        <exec executable="${basedir}/glassfish/bin/asadmin" failifexecutionfails="true" failonerror="true">
             <arg value="--port=${admin.port}"/>
             <arg value="--host=localhost"/>
             <arg value="undeploy"/>
@@ -233,7 +234,7 @@
             <available file="bibimainapp"/>  
             <antcontrib:then>
                 <ant antfile="build.xml" target="dist" dir="bibimainapp"/> 
-                 <exec executable="${basedir}/glassfish3/bin/asadmin" failifexecutionfails="true" failonerror="true">
+                 <exec executable="${basedir}/glassfish/bin/asadmin" failifexecutionfails="true" failonerror="true">
                     <arg value="--user=admin"/>
                     <arg value="--passwordfile=appserver_config/local.passwordfile"/>
                     <arg value="--port=${admin.port}"/>
@@ -245,7 +246,7 @@
                 </exec>               
             </antcontrib:then>
             <antcontrib:else>
-                <exec executable="${basedir}/glassfish3/bin/asadmin" failifexecutionfails="true" failonerror="true">
+                <exec executable="${basedir}/glassfish/bin/asadmin" failifexecutionfails="true" failonerror="true">
                     <arg value="--user=admin"/>
                     <arg value="--passwordfile=appserver_config/local.passwordfile"/>
                     <arg value="--port=${admin.port}"/>
@@ -288,7 +289,7 @@
     
     <target name="wipe.all" depends="wipe" description="depends on wipe and additional remove all install directories">
         <delete dir="appserver_config"/>
-        <delete dir="glassfish3"/>
+        <delete dir="glassfish"/>
         <delete dir="base"/>
         <delete dir="bibimainapp" failonerror="no"/>
     </target>
@@ -420,7 +421,7 @@
                 <echo>create configuration </echo>
                 <!-- local configuration -->
                 <propertyfile file="appserver_config/local.configuration">
-                    <entry key="catalina.home" value="${basedir}/glassfish3"/>
+                    <entry key="catalina.home" value="${basedir}/glassfish"/>
                     <entry key="domain.dir" value="${base.dir}"/>
                     <entry key="domain" value="bibidomain"/>
                     <entry key="admin.user" value="admin"/>
@@ -590,10 +591,31 @@
         <unzipResource resource=".cache/base.zip" depdir="base"/>
     </target>
            
-    <target name=".unzip.glassfish">                  
-        <unzipResource resource=".cache/glassfish-3.1.2.2.zip" depdir="glassfish3"/>
-        <chmod perm="ugo+rx" file="glassfish3/bin/asadmin"/>
-        <chmod perm="ugo+rx" file="glassfish3/javadb/bin/ij"/>   
+    <target name=".unzip.glassfish">           
+        <antcontrib:if>
+            <isset property="glassfish4"/>       
+            <antcontrib:then>
+                <unzipResource resource=".cache/glassfish-4.0.zip" depdir="glassfish"/>
+                <antcontrib:if>
+                    <available file="glassfish4"/>
+                    <antcontrib:then>
+                        <move file="glassfish4" tofile="glassfish"/>
+                    </antcontrib:then>
+                </antcontrib:if>
+            </antcontrib:then>
+            <antcontrib:else>
+                <unzipResource resource=".cache/glassfish-3.1.2.2.zip" depdir="glassfish"/>
+                <antcontrib:if>
+                    <available file="glassfish3"/>
+                    <antcontrib:then>
+                        <move file="glassfish3" tofile="glassfish"/>
+                    </antcontrib:then>
+                </antcontrib:if>
+            </antcontrib:else>
+            
+        </antcontrib:if>
+        <chmod perm="ugo+rx" file="glassfish/bin/asadmin"/>
+        <chmod perm="ugo+rx" file="glassfish/javadb/bin/ij"/> 
     </target>
     
     <macrodef name="unzipResource">
@@ -621,7 +643,18 @@
     </target> 
     
     <target name=".get.glassfish">
-        <checkAndDownload resource="glassfish-3.1.2.2.zip" url="${glassfish_url}" checksum="ae8e17e9dcc80117cb4b39284302763f"/>
+        <antcontrib:if>
+            <isset property="glassfish4"/>
+                
+            
+            <antcontrib:then>
+                <checkAndDownload resource="glassfish-4.0.zip" url="${bibiserv_url}/resources" checksum="9de52f5bd1d39aa7a20614361552861c"/>
+            </antcontrib:then>
+            <antcontrib:else>
+                <checkAndDownload resource="glassfish-3.1.2.2.zip" url="${bibiserv_url}/resources" checksum="ae8e17e9dcc80117cb4b39284302763f"/>
+            </antcontrib:else>
+        </antcontrib:if>
+        
     </target> 
     
     <target name=".get.modules">
@@ -722,17 +755,18 @@ Default target: help
 Configuration can individualized setting properties, following properties
 are supported :
 
-name                | description                   | defaultvalue                   
-bibiserv_url        | BiBiServ resource url         | ${bibiserv_url} 
-glassfish_url       | GlassFish resource url        | ${glassfish_url} 
-base.dir            | base dir                      | ${base.dir}  comment : /tmp/$${user.name} 
-spool.dir           | spool dir                     | ${spool.dir} comment : $${base.dir}/spool
-exec.dir            | executation dir (for binaries)| ${exec.dir}  comment : $${base.dir}/bin
-tool.dir            | generated tool project dir    | ${tool.dir}  comment : $${base.dir}/gentools 
-portbase            | glassfish port base           | 8000
-                    | (http: +80, https: +81)       |         
-db.port             | database port                 | 8027 comment : $${portbase} + 27
-admin.port          | administration port           | 8048 comment : $${portbase} + 48
+name                | description                      | defaultvalue                   
+bibiserv_url        | BiBiServ resource url            | ${bibiserv_url} 
+glassfish_url       | GlassFish resource url           | ${glassfish_url} 
+base.dir            | base dir                         | ${base.dir}  comment : /tmp/$${user.name} 
+spool.dir           | spool dir                        | ${spool.dir} comment : $${base.dir}/spool
+exec.dir            | executation dir (for binaries)   | ${exec.dir}  comment : $${base.dir}/bin
+tool.dir            | generated tool project dir       | ${tool.dir}  comment : $${base.dir}/gentools 
+portbase            | glassfish port base              | 8000
+                    | (http: +80, https: +81)          |         
+db.port             | database port                    | 8027 comment : $${portbase} + 27
+admin.port          | administration port              | 8048 comment : $${portbase} + 48
+glassfish4          | use glassfish 4 instead of 3.1.x | unset
 
 Example :
 
