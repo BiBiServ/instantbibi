@@ -222,6 +222,15 @@
             <arg value="wizard"/>
         </exec>
     </target>
+    
+    <target name="undeploy" depends=".config.setting" description="undeploy bibimainapp">
+        <exec executable="${basedir}/glassfish/bin/asadmin" failifexecutionfails="true" failonerror="true">
+            <arg value="--port=${admin.port}"/>
+            <arg value="--host=localhost"/>
+            <arg value="undeploy"/>
+            <arg value="bibimainapp"/>
+        </exec>    
+    </target>
   
     <target name="start" description="start glassfish/database and deploys bibimainapp">
         <ant antfile="build.xml" target="start" dir="appserver_config"/>
