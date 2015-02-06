@@ -604,7 +604,7 @@
         <antcontrib:if>
             <isset property="glassfish4"/>       
             <antcontrib:then>
-                <unzipResource resource=".cache/glassfish-4.0.zip" depdir="glassfish"/>
+                <unzipResource resource=".cache/glassfish-4.1.zip" depdir="glassfish"/>
                 <antcontrib:if>
                     <available file="glassfish4"/>
                     <antcontrib:then>
@@ -657,7 +657,7 @@
                 
             
             <antcontrib:then>
-                <checkAndDownload resource="glassfish-4.0.zip" url="${bibiserv_url}/resources" checksum="9de52f5bd1d39aa7a20614361552861c"/>
+                <checkAndDownload resource="glassfish-4.1.zip" url="${bibiserv_url}/resources" checksum="2fd41ad9af8d41d1c721c1b25191f674"/>
             </antcontrib:then>
             <antcontrib:else>
                 <checkAndDownload resource="glassfish-3.1.2.2.zip" url="${bibiserv_url}/resources" checksum="ae8e17e9dcc80117cb4b39284302763f"/>
@@ -775,7 +775,7 @@ portbase            | glassfish port base              | 8000
                     | (http: +80, https: +81)          |         
 db.port             | database port                    | 8027 comment : $${portbase} + 27
 admin.port          | administration port              | 8048 comment : $${portbase} + 48
-glassfish4          | use glassfish 4 instead of 3.1.x | unset
+glassfish4          | use GF 4.1 instead of 3.1.x      | unset
 
 Example :
 
