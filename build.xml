@@ -485,6 +485,54 @@
                 <echo>found previous configuration ...</echo>
             </antcontrib:else>
         </antcontrib:if>
+        
+        <!-- check if all ports available -->
+        <antcontrib:if>
+            <socket server="localhost" port="${http.port}"/>
+            <antcontrib:then>
+                <property name="port_used" value="true"/>
+                <echo>HTTP port (${http.port}) is already in use !</echo>
+            </antcontrib:then>
+        </antcontrib:if>
+        
+        <antcontrib:if>
+            <socket server="localhost" port="${https.port}"/>
+            <antcontrib:then>
+                <property name="port_used" value="true"/>
+                <echo>HTTPS port (${https.port}) is already in use !</echo>
+            </antcontrib:then>
+        </antcontrib:if>
+        
+        <antcontrib:if>
+            <socket server="localhost" port="${admin.port}"/>
+            <antcontrib:then>
+                <property name="port_used" value="true"/>
+                <echo>ADMIN port (${admin.port}) is already in use !</echo>
+            </antcontrib:then>
+        </antcontrib:if>
+        
+        <antcontrib:if>
+            <socket server="localhost" port="${db.port}"/>
+            <antcontrib:then>
+                <property name="port_used" value="true"/>
+                <echo>DB port (${db.port}) is already in use !</echo>
+            </antcontrib:then>
+        </antcontrib:if>
+        
+        
+        <antcontrib:if>
+            <isset property="port_used"/>
+            <antcontrib:then>
+                <echo>At least on port (see previous log message) needed by current configuration is in use by another process. Abbort!</echo>
+                <fail>Port(s) already in use ...</fail>
+            </antcontrib:then>
+        </antcontrib:if>
+        
+        
+        
+            
+            
+        
     </target>
 
     <target name=".create.bibimainapp.pwfile" depends=".config.setting">
