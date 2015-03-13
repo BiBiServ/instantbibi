@@ -326,6 +326,7 @@
         <delete dir="appserver_config"/>
         <delete dir="glassfish"/>
         <delete dir="base"/>
+        <delete dir=".tmp" failonerror="no"/>
         <delete dir="bibimainapp" failonerror="no"/>
     </target>
 
@@ -823,82 +824,117 @@
 
     <!-- ######################## help ########################### -->
     <target name="help" description="print out a help message (same as ant -p)">
-        <echo>Main targets: deploy (re)deploys bibimainapp help print out a help message (same as
-            ant -p) install.antlib install needed ant libraries to ${user.home}/.ant/lib - mandatory
-            for developer install.dialign download dialign.bar and dialign.binary and deploy both
-            install.guugle download guugle.bar and guugle.binary and deploy both install.resource
-            install instantbibi as resource on bibiserv, could only be run with developer version
-            from mercurial repository install.wizard (re)deploys the bibiserv2 wizard on glassfish
-            instant create/configure GF, deploys bibimainapp using stable resources instant.dev
-            setup a complete BiBiServ2 environment using latest developer resources from mercurial
-            repository! showconfig shows current configuration start start glassfish/database and
-            deploys bibimainapp stop stops glassfish and database update.dev updates
-            appserver_config, bibimainapp, base from mercurial wipe stops GF and clean up domain
-            including spool and exec dir! wipe.all depends on wipe and remove install directories
-            Default target: help Configuration can individualized setting properties, following
-            properties are supported : name | description | defaultvalue bibiserv_url | BiBiServ
-            resource url | ${bibiserv_url} glassfish_url | GlassFish resource url | ${glassfish_url}
-            base.dir | base dir | ${base.dir} comment : /tmp/$${user.name} spool.dir | spool dir |
-            ${spool.dir} comment : $${base.dir}/spool exec.dir | executation dir (for binaries) |
-            ${exec.dir} comment : $${base.dir}/bin tool.dir | generated tool project dir |
-            ${tool.dir} comment : $${base.dir}/gentools portbase | glassfish port base | 8000 |
-            (http: +80, https: +81) | db.port | database port | 8027 comment : $${portbase} + 27
-            admin.port | administration port | 8048 comment : $${portbase} + 48 glassfish4 | use GF
-            4.1 instead of 3.1.x | unset Example : ant -Dportbase=18000 -Dbase.dir=/vol/bibiserv2
-            instant Setup a new bibiserv2 instance with port base 18000 (-> http:18080, https:18081,
-            admin:18048, db:18027) and .vol/bibiserv2 as base dir. </echo>
+        <echo>Main targets: 
+            deploy              (re)deploys bibimainapp 
+            deploy.app          deploy an application from repository on server (-Dapp=ID_OF_APP)
+            undeploy.app        undeploy any application from server (-Dapp=ID_OF_APP)
+            
+            help                print out a help message (same as ant -p) 
+            
+            install.antlib      install needed ant libraries to ${user.home}/.ant/lib - mandatory
+                                for developer 
+            install.resource    install instantbibi as resource on bibiserv, could only be run with developer version
+                                from mercurial repository 
+            install.wizard      (re)deploys the bibiserv2 wizard on glassfish
+            instant             create/configure GF, deploys bibimainapp using stable resources 
+            instant.dev         setup a complete BiBiServ2 environment using latest developer resources from mercurial
+                                repository! 
+            
+            list.apps           list all available apps located in bibiserv repository
+                                
+            showconfig          shows current configuration start start glassfish/database and
+                                deploys bibimainapp stop stops glassfish and database 
+            update.dev          updates appserver_config, bibimainapp, base from mercurial 
+            wipe                stops GF and clean up domain including spool and exec dir! 
+            wipe.all            depends on wipe and remove install directories
+            
+            Default target: help 
+            
+            Configuration can individualized setting properties, following properties are supported : 
+            
+            name            | description                                   | defaultvalue 
+            bibiserv_url    | BiBiServ resource url                         | ${bibiserv_url} 
+            glassfish_url   | GlassFish resource url                        | ${glassfish_url}
+            base.dir        | base dir                                      | ${base.dir} comment : /tmp/$${user.name} 
+            spool.dir       | spool dir                                     | ${spool.dir} comment : $${base.dir}/spool 
+            exec.dir        | executation dir (for binaries)                | ${exec.dir} comment : $${base.dir}/bin 
+            tool.dir        | generated tool project dir                    | ${tool.dir} comment : $${base.dir}/gentools 
+            portbase        | glassfish port base                           | 8000 
+                                                                            | (http: +80, https: +81) | 
+            db.port         | database port                                 | 8027 comment : $${portbase} + 27
+            admin.port      | administration port                           | 8048 comment : $${portbase} + 48 
+            glassfish4      | use GF4.1 instead of 3.1.x                    | unset 
+            
+            Example : ant -Dportbase=9000 -Dbase.dir=/vol/bibiserv2
+            instant Setup a new bibiserv2 instance with port base 9000 (-> http:9080, https:9081,
+            admin:9048, db:9027) and /vol/bibiserv2 as base dir. </echo>
     </target>
 
     <!-- ######################## tools ########################### -->
-    <target name="install.guugle"
-        description="download guugle.bar and guugle.binary and deploy both"
-        depends=".config.setting,.resolve">
-        <install.tool name="guugle"/>
-    </target>
-
-    <target name="install.dialign"
-        description="download dialign.bar and dialign.binary and deploy both"
-        depends=".config.setting,.resolve">
-        <install.tool name="dialign"/>
-    </target>
-
-
-    <macrodef name="install.tool"
-        description="deploy a tool on server and install binaries into server tools dir">
-        <attribute name="name"/>
-        <sequential>
-            <!-- determine os and machine architecture -->
-            <exec executable="uname" outputproperty="os" failifexecutionfails="true"
-                failonerror="true"/>
-            <exec executable="uname" outputproperty="arch" failifexecutionfails="true"
-                failonerror="true">
-                <arg value="-m"/>
-            </exec>
-
-            <!-- @TODO: check for supported os/arch are still missing -->
-            <mkdir dir=".tmp.@{name}"/>
-            <get src="${bibiserv_url}/resources/apps/@{name}.bar" dest=".tmp.@{name}"/>
-            <get src="${bibiserv_url}/resources/apps/@{name}.${os}.${arch}.zip" dest=".tmp.@{name}"/>
-            <!-- unzip bin to tools.dir -->
-            <unzip src=".tmp.@{name}/@{name}.${os}.${arch}.zip" dest="${exec.dir}"/>
-            <!-- fits permissions -->
-            <chmod perm="ugo+x">
-                <fileset dir="${exec.dir}">
-                    <include name="**/*"/>
+    
+    <target name="deploy.app" description="deploy application" depends=".config.setting,.resolve">
+        
+      <fail unless="app">You have to define an application to deploy using -Dapp=APPNAME</fail>
+                
+        <mkdir dir=".tmp"/>
+        <!-- get bar from server -->
+        <get src="${bibiserv_url}/resources/apps/${app}.bar" dest=".tmp"/>
+        
+        
+        <!-- deploy bar archive to server -->
+        <java classname="de.unibi.cebitec.bibiserv.client.manager.ManagerClient" fork="true">
+            <classpath>
+                <fileset dir="lib">
+                    <include name="*.jar"/>
                 </fileset>
-            </chmod>
-            <!-- deploy bar archive to server -->
-            <java classname="de.unibi.cebitec.bibiserv.client.manager.ManagerClient" fork="true">
-                <classpath>
-                    <fileset dir="lib">
-                        <include name="*.jar"/>
-                    </fileset>
-                </classpath>
-                <arg value="deploy"/>
-                <arg value=".tmp.@{name}/@{name}.bar"/>
-            </java>
-        </sequential>
-    </macrodef>
+            </classpath>
+            <arg value="deploy"/>
+            <arg value=".tmp/${app}.bar"/>
+        </java>
+        
+        <!-- remove bar -->
+        <delete file=".tmp/${app}.bar"/>
+    </target>
+    
+    
+    <target name="undeploy.app" description="undeploy an application" depends=".config.setting,.resolve">
+        <fail unless="app">You have to define an application to deploy using -Dapp=APPNAME</fail>
+        
+        <!-- undeploy app from server-->
+        <java classname="de.unibi.cebitec.bibiserv.client.manager.ManagerClient" fork="true">
+            <classpath>
+                <fileset dir="lib">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+            <arg value="undeploy"/>
+            <arg value="${app}"/>
+        </java>
+    </target>
+    
+    
+    <target name="list.apps" description="list all applications available from BiBiServ repository">
+        <mkdir dir=".tmp"/>
+        <get src="${bibiserv_url}/resources/apps/" dest=".tmp"/>
+        <replaceregexp file=".tmp/apps"
+            match=".+href=&quot;(.+?)\.bar.+"
+            replace="\1"
+            byline="true"
+        />
+        <loadfile
+            property="list.apps"
+            srcFile=".tmp/apps">
+            <filterchain>
+                <linecontains negate="true">
+                    <contains value="&lt;"/>
+                </linecontains>
+            </filterchain>
+        </loadfile>
+        <echo>List of available apps:</echo>
+        <echo>${list.apps}</echo>
+        <delete file=".tmp/apps"/>
+    </target>
+
 
     <!-- ######################## ivy dependencies ########################### -->
 
