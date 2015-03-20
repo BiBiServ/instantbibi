@@ -864,17 +864,19 @@
                             |                                               | (http: +80, https: +81) | 
             db.port         | database port                                 | 8027 comment : $${portbase} + 27
             admin.port      | administration port                           | 8048 comment : $${portbase} + 48 
-            
+                            |                                               |
             glassfish4      | use GF4.1 instead of 3.1.x                    | unset 
             enable.docker   | enables docker (recommend for linux only)     | unset
                             | Needs an installed and configured docker environment !         
             config.64       | enables 64Bit support                         | unset
                             | Needs an 64 Bit capable OS/JVM !
-            config.OGE      | enables OGE support                           | unset
+            config.oge      | enables OGE support                           | unset
                             | Needs an installed and configured OGE environmet and
                             | additional  properties set :  drmaa.jar, drmaa.library.path
-            drmaa.jar       | points to a drmaa Java library fitting for installed  OGE
-            drmaa.library.path | points to  drmaa library path, where OGE shared objects are installed
+             + drmaa.jar    | points to a drmaa Java library fitting for installed  OGE
+             + drmaa.library.path | points to  drmaa library path, where OGE shared objects are installed
+                            |                                               |
+            enable.ritc     | enables RunInTheCloud support                 | unset
             
             Example : ant -Dportbase=9000 -Dbase.dir=/vol/bibiserv2
             instant Setup a new bibiserv2 instance with port base 9000 (-> http:9080, https:9081,
