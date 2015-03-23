@@ -752,7 +752,16 @@
     </target>
 
     <target name=".get.modules">
-        <get src="${bibiserv_url}/resources/modules/modules.txt" dest=".cache/modules.txt"/>
+        <antcontrib:if>
+            <isset property="use.min.module.set"/>
+            <antcontrib:then>
+                <get src="${bibiserv_url}/resources/modules/modules-minimal.txt" dest=".cache/modules.txt"/>
+            </antcontrib:then>
+            <antcontrib:else>
+                <get src="${bibiserv_url}/resources/modules/modules.txt" dest=".cache/modules.txt"/>
+            </antcontrib:else>
+        </antcontrib:if>
+        
         <loadresource property="modullist">
             <file file=".cache/modules.txt"/>
         </loadresource>
@@ -853,30 +862,31 @@
             
             Configuration can individualized setting properties, following properties are supported : 
             
-            name            | description                                   | defaultvalue 
-            bibiserv_url    | BiBiServ resource url                         | ${bibiserv_url} 
-            glassfish_url   | GlassFish resource url                        | ${glassfish_url}
-            base.dir        | base dir                                      | ${base.dir} comment : /tmp/$${user.name} 
-            spool.dir       | spool dir                                     | ${spool.dir} comment : $${base.dir}/spool 
-            exec.dir        | executation dir (for binaries)                | ${exec.dir} comment : $${base.dir}/bin 
-            tool.dir        | generated tool project dir                    | ${tool.dir} comment : $${base.dir}/gentools 
-            portbase        | glassfish port base                           | 8000 
-                            |                                               | (http: +80, https: +81) | 
-            db.port         | database port                                 | 8027 comment : $${portbase} + 27
-            admin.port      | administration port                           | 8048 comment : $${portbase} + 48 
-                            |                                               |
-            glassfish4      | use GF4.1 instead of 3.1.x                    | unset 
-            enable.docker   | enables docker (recommend for linux only)     | unset
-                            | Needs an installed and configured docker environment !         
-            config.64       | enables 64Bit support                         | unset
-                            | Needs an 64 Bit capable OS/JVM !
-            config.oge      | enables OGE support                           | unset
-                            | Needs an installed and configured OGE environmet and
-                            | additional  properties set :  drmaa.jar, drmaa.library.path
-             + drmaa.jar    | points to a drmaa Java library fitting for installed  OGE
+            name             | description                                   | defaultvalue 
+            bibiserv_url        | BiBiServ resource url                         | ${bibiserv_url} 
+            glassfish_url       | GlassFish resource url                        | ${glassfish_url}
+            base.dir            | base dir                                      | ${base.dir} comment : /tmp/$${user.name} 
+            spool.dir           | spool dir                                     | ${spool.dir} comment : $${base.dir}/spool 
+            exec.dir            | executation dir (for binaries)                | ${exec.dir} comment : $${base.dir}/bin 
+            tool.dir            | generated tool project dir                    | ${tool.dir} comment : $${base.dir}/gentools 
+            portbase            | glassfish port base                           | 8000 
+                                |                                               | (http: +80, https: +81) | 
+            db.port             | database port                                 | 8027 comment : $${portbase} + 27
+            admin.port          | administration port                           | 8048 comment : $${portbase} + 48 
+                                |                                               |
+            glassfish4          | use GF4.1 instead of 3.1.x                    | unset 
+            enable.docker       | enables docker (recommend for linux only)     | unset
+                                | Needs an installed and configured docker environment !         
+            config.64           | enables 64Bit support                         | unset
+                                | Needs an 64 Bit capable OS/JVM !
+            config.oge          | enables OGE support                           | unset
+                                | Needs an installed and configured OGE environmet and
+                                | additional  properties set :  drmaa.jar, drmaa.library.path
+             + drmaa.jar        | points to a drmaa Java library fitting for installed  OGE
              + drmaa.library.path | points to  drmaa library path, where OGE shared objects are installed
-                            |                                               |
-            enable.ritc     | enables RunInTheCloud support                 | unset
+                                |                                               |
+            enable.ritc         | enables RunInTheCloud support                 | unset
+            use.min.module.set  | use minimal module set                        | unset
             
             Example : ant -Dportbase=9000 -Dbase.dir=/vol/bibiserv2
             instant Setup a new bibiserv2 instance with port base 9000 (-> http:9080, https:9081,
