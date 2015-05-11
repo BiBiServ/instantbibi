@@ -285,7 +285,7 @@
         </antcontrib:if>
     </target>
 
-    <target name="stop" description="stops glassfish and database">
+    <target name="stop" description="stops glassfish and database" depends=".config.setting">
         <antcontrib:if>
             <available file="${base.dir}/bibidomain"/>
             <antcontrib:then>
@@ -685,22 +685,22 @@
 
     <target name=".unzip.glassfish">
         <antcontrib:if>
-            <isset property="glassfish4"/>
+            <isset property="glassfish3"/>
             <antcontrib:then>
-                <unzipResource resource=".cache/glassfish-4.1.zip" depdir="glassfish"/>
-                <antcontrib:if>
-                    <available file="glassfish4"/>
-                    <antcontrib:then>
-                        <move file="glassfish4" tofile="glassfish"/>
-                    </antcontrib:then>
-                </antcontrib:if>
-            </antcontrib:then>
-            <antcontrib:else>
                 <unzipResource resource=".cache/glassfish-3.1.2.2.zip" depdir="glassfish"/>
                 <antcontrib:if>
                     <available file="glassfish3"/>
                     <antcontrib:then>
                         <move file="glassfish3" tofile="glassfish"/>
+                    </antcontrib:then>
+                </antcontrib:if>
+            </antcontrib:then>
+            <antcontrib:else>
+                <unzipResource resource=".cache/glassfish-4.1.zip" depdir="glassfish"/>
+                <antcontrib:if>
+                    <available file="glassfish4"/>
+                    <antcontrib:then>
+                        <move file="glassfish4" tofile="glassfish"/>
                     </antcontrib:then>
                 </antcontrib:if>
             </antcontrib:else>
@@ -736,19 +736,16 @@
 
     <target name=".get.glassfish">
         <antcontrib:if>
-            <isset property="glassfish4"/>
-
-
+            <isset property="glassfish3"/>
             <antcontrib:then>
-                <checkAndDownload resource="glassfish-4.1.zip" url="${bibiserv_url}/resources"
-                    checksum="2fd41ad9af8d41d1c721c1b25191f674"/>
-            </antcontrib:then>
-            <antcontrib:else>
                 <checkAndDownload resource="glassfish-3.1.2.2.zip" url="${bibiserv_url}/resources"
                     checksum="ae8e17e9dcc80117cb4b39284302763f"/>
+            </antcontrib:then>
+            <antcontrib:else>
+                <checkAndDownload resource="glassfish-4.1.zip" url="${bibiserv_url}/resources"
+                    checksum="2fd41ad9af8d41d1c721c1b25191f674"/>      
             </antcontrib:else>
         </antcontrib:if>
-
     </target>
 
     <target name=".get.modules">
@@ -874,7 +871,7 @@
             db.port             | database port                                 | 8027 comment : $${portbase} + 27
             admin.port          | administration port                           | 8048 comment : $${portbase} + 48 
                                 |                                               |
-            glassfish4          | use GF4.1 instead of 3.1.x                    | unset 
+            glassfish3          | use GF3.1.2 instead of 4                      | unset 
             enable.docker       | enables docker (recommend for linux only)     | unset
                                 | Needs an installed and configured docker environment !         
             config.64           | enables 64Bit support                         | unset
