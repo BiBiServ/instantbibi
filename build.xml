@@ -2,7 +2,7 @@
 <!-- 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
     
-    Copyright 2011-2014 BiBiServ Curator Team, http://bibiserv.cebitec.uni-bielefeld.de,
+    Copyright 2011-2016 BiBiServ Curator Team, http://bibiserv.cebitec.uni-bielefeld.de,
     All rights reserved.
     
     The contents of this file are subject to the terms of the Common
@@ -16,7 +16,7 @@
     below the License Header, with the fields enclosed by brackets [] replaced
     by your own identifying information:
     
-    "Portions Copyrighted 2011-2014 BiBiServ Curator Team, http://bibiserv.cebitec.uni-bielefeld.de"
+    "Portions Copyrighted 2011-2016 BiBiServ Curator Team, http://bibiserv.cebitec.uni-bielefeld.de"
     
     Contributor(s): Jan Krueger
     
@@ -143,6 +143,17 @@
         <antcall target=".create.domain"/>
         <antcall target=".add.parts"/>
         <antcall target="start"/>
+        <antcall target="showconfig"/>
+    </target>
+    
+    <target name="setup.domain" description="create and configure a new GF new domain">
+        
+        <antcall target=".get.glassfish"/>
+        <antcall target=".unzip.glassfish"/>
+        <antcall target=".get.config"/>
+        <antcall target=".unzip.config"/>
+        <antcall target=".create.config"/>
+        <antcall target=".create.domain"/>
         <antcall target="showconfig"/>
     </target>
 
@@ -676,11 +687,15 @@
 
     <!-- ######################## unzip downloaded sources  ########################### -->
 
-    <target name=".unzip">
-        <!-- appserver config -->
-        <unzipResource resource=".cache/appserver_config.zip" depdir="appserver_config"/>
+    <target name=".unzip" depends=".unzip.config">
+        
         <!-- base -->
         <unzipResource resource=".cache/base.zip" depdir="base"/>
+    </target>
+
+    <target name=".unzip.config">
+        <!-- appserver config -->
+        <unzipResource resource=".cache/appserver_config.zip" depdir="appserver_config"/>
     </target>
 
     <target name=".unzip.glassfish">
@@ -727,11 +742,13 @@
     </macrodef>
 
     <!-- ######################## targets to download sources from server ########################### -->
-    <target name=".get">
+    <target name=".get" depends=".get.config">
         <checkAndDownload resource="bibimainapp.war" url="${bibiserv_url}/resources"/>
-
-        <checkAndDownload resource="appserver_config.zip" url="${bibiserv_url}/resources"/>
         <checkAndDownload resource="base.zip" url="${bibiserv_url}/resources"/>
+    </target>
+    
+    <target name=".get.config">
+        <checkAndDownload resource="appserver_config.zip" url="${bibiserv_url}/resources"/>  
     </target>
 
     <target name=".get.glassfish">
