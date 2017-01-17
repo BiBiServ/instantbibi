@@ -13,6 +13,8 @@ machine:
   environment:
     _JAVA_OPTIONS: "-Xmx3024m"
 test:
+  pre:
+    - ant wipe.all
   override:
     - ant install.antlib 
     - ant instant -Ddb.host=localhost
