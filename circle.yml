@@ -13,10 +13,11 @@ machine:
   environment:
     _JAVA_OPTIONS: "-Xmx3024m"
 test:
-  pre:
-    - ant wipe.all
-    - rm  ~/.bibiserv2_manager
   override:
     - ant install.antlib 
+    - ant wipe.all
+    - rm  ~/.bibiserv2_manager
     - ant instant -Ddb.host=localhost
+    - ant wipe.all
+    - rm  ~/.bibiserv2_manager
     - ant instant.environment
