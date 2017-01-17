@@ -86,7 +86,6 @@
     ]]>
     </scriptdef>
 
-
     <!-- get information about host -->
     <hostinfo prefix="hostinfo"/>
 
@@ -113,11 +112,8 @@
 
     </target>
 
-
-
     <target name="instant"
         description="create/configure GF, deploys bibimainapp using stable resources">
-
         <antcall target=".get"/>
         <antcall target=".unzip"/>
         <antcall target=".get.glassfish"/>
@@ -130,7 +126,6 @@
         <antcall target="start"/>
         <antcall target="showconfig"/>
     </target>
-
 
     <target name="instant.dev"
         description="setup a complete BiBiServ2 environment using latest developer resources from mercurial repository!">
@@ -222,7 +217,7 @@
 
     <target name="install.wizard" depends=".config.setting"
         description="(re)deploys bibiserv2 wizard, application server must be running.">
-        <checkAndDownload resource="Wizard2011.war" url="${bibiserv_url}/resources"/>
+        <checkAndDownload dest="Wizard2011.war" url="${bibiserv_url}/resources/Wizard2011.war"/>
         <exec executable="${basedir}/glassfish/bin/asadmin" failifexecutionfails="true"
             failonerror="true">
             <arg value="--user=admin"/>
@@ -390,6 +385,18 @@
 
     </target>
 
+    <target name=".resources.setting">
+        <antcontrib:if>
+            <available file="resources.config"/>
+            <antcontrib:then>
+                <echo>use existing resources file ...</echo>
+                <loadproperties srcFile="resources.config"/>
+            </antcontrib:then>
+            <antcontrib:else>
+                <fail message="You have to provide a resources.config file"/>
+            </antcontrib:else>
+        </antcontrib:if>
+    </target>
 
     <target name=".config.setting">
         <antcontrib:if>
@@ -728,6 +735,7 @@
     <macrodef name="unzipResource">
         <attribute name="resource"/>
         <attribute name="depdir"/>
+        <attribute name="dest" default="@{depdir}"/>
         <sequential>
             <antcontrib:if>
                 <available file="@{depdir}"/>
@@ -735,32 +743,38 @@
                     <echo>found previous @{depdir} installation ...</echo>
                 </antcontrib:then>
                 <antcontrib:else>
-                    <unzip src="@{resource}" dest="."/>
+                    <mkdir dir="@{depdir}"/>
+                    <unzip src="@{resource}" dest="@{depdir}">
+                        <cutdirsmapper dirs="1" />
+                    </unzip>
+                    <move todir="@{depdir}" verbose="true">
+                        <fileset dir="@{depdir}">
+                            <include name="/./**"/>
+                        </fileset>
+                    </move>
                 </antcontrib:else>
             </antcontrib:if>
         </sequential>
     </macrodef>
 
     <!-- ######################## targets to download sources from server ########################### -->
-    <target name=".get" depends=".get.config">
-        <checkAndDownload resource="bibimainapp.war" url="${bibiserv_url}/resources"/>
-        <checkAndDownload resource="base.zip" url="${bibiserv_url}/resources"/>
+    <target name=".get" depends=".get.config,.resources.setting">
+        <checkAndDownload url="${bibimainapp}" dest="bibimainapp.war"/>
+        <checkAndDownload url="${bibiserv_url}/resources/base.zip" dest="base.zip"/>
     </target>
     
-    <target name=".get.config">
-        <checkAndDownload resource="appserver_config.zip" url="${bibiserv_url}/resources"/>  
+    <target name=".get.config,.resources.setting">
+        <checkAndDownload url="${server_config}"  dest="appserver_config.zip"/>
     </target>
 
     <target name=".get.glassfish">
         <antcontrib:if>
             <isset property="glassfish3"/>
             <antcontrib:then>
-                <checkAndDownload resource="glassfish-3.1.2.2.zip" url="${bibiserv_url}/resources"
-                    checksum="ae8e17e9dcc80117cb4b39284302763f"/>
+                <checkAndDownload dest="glassfish-3.1.2.2.zip" url="${bibiserv_url}/resources/glassfish-3.1.2.2.zip"/>
             </antcontrib:then>
             <antcontrib:else>
-                <checkAndDownload resource="glassfish-4.1.zip" url="${bibiserv_url}/resources"
-                    checksum="2fd41ad9af8d41d1c721c1b25191f674"/>      
+                <checkAndDownload dest="glassfish-4.1.zip" url="${bibiserv_url}/resources/glassfish-4.1.zip"/>
             </antcontrib:else>
         </antcontrib:if>
     </target>
@@ -782,7 +796,7 @@
         <antcontrib:for list="${modullist}" param="module" delimiter="${line.separator}">
             <sequential>
                 <echo>@{module}</echo>
-                <checkAndDownload resource="@{module}" url="${bibiserv_url}/resources/modules"/>
+                <checkAndDownload dest="@{module}" url="${bibiserv_url}/resources/modules/@{module}"/>
             </sequential>
         </antcontrib:for>
     </target>
@@ -794,53 +808,25 @@
         <antcontrib:for list="${itemlist}" param="item" delimiter="${line.separator}">
             <sequential>
                 <echo>@{item}</echo>
-                <checkAndDownload resource="@{item}" url="${bibiserv_url}/resources/items"/>
+                <checkAndDownload dest="@{item}" url="${bibiserv_url}/resources/items/@{item}"/>
             </sequential>
         </antcontrib:for>
     </target>
 
-
     <macrodef name="checkAndDownload"
         description="check if a resource is cached and up to date, otherwise download it from given url">
-        <attribute name="resource"/>
         <attribute name="url"/>
-        <attribute name="checksum" default=""/>
+        <attribute name="dest"/>
         <sequential>
-            <local name="local.md5"/>
-            <local name="url.md5"/>
             <antcontrib:if>
-                <available file=".cache/@{resource}"/>
+                <available file=".cache/@{dest}"/>
                 <antcontrib:then>
-                    <antcontrib:if>
-                        <equals arg1="@{checksum}" arg2="" trim="true" forcestring="true"/>
-                        <antcontrib:then>
-                            <loadresource property="url.md5">
-                                <url url="@{url}/@{resource}.md5"/>
-                            </loadresource>
-                        </antcontrib:then>
-                        <antcontrib:else>
-                            <property name="url.md5" value="@{checksum}"/>
-                        </antcontrib:else>
-                    </antcontrib:if>
-                    <checksum algorithm="md5" format="CHECKSUM" file=".cache/@{resource}"
-                        property="local.md5"/>
-                    <antcontrib:if>
-                        <equals trim="yes" forcestring="yes" arg1="${local.md5}" arg2="${url.md5}"/>
-                        <antcontrib:then>
-                            <echo>Cached resource '@{resource}' is up-to-date.</echo>
-                        </antcontrib:then>
-                        <antcontrib:else>
-                            <echo>Cached resource is out-of-date. Update resource from
-                                @{url}/resources/.</echo>
-                            <delete file=".cache/@{resource}"/>
-                            <get src="@{url}/@{resource}" dest=".cache/@{resource}"/>
-                        </antcontrib:else>
-                    </antcontrib:if>
+                    <echo>Resource is already downloaded</echo>
                 </antcontrib:then>
                 <antcontrib:else>
                     <echo>Download resource @{resource} from @{url}/resources/</echo>
                     <mkdir dir=".cache"/>
-                    <get src="@{url}/@{resource}" dest=".cache/@{resource}"/>
+                    <get src="@{url}/@{resource}" dest=".cache/@{dest}"/>
                 </antcontrib:else>
             </antcontrib:if>
         </sequential>
