@@ -15,4 +15,4 @@ machine:
 test:
   override:
     - ant install.antlib 
-    - ant instant -Ddb.host=hostname
+    - ant instant -Ddb.host=localhost
