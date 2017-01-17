@@ -20,4 +20,5 @@ test:
     - ant instant -Ddb.host=localhost
     - ant wipe.all
     - rm  ~/.bibiserv2_manager
-    - ant instant.environment
+    - ant instant.environment -Ddb.host=localhost
+
