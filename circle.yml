@@ -16,3 +16,6 @@ test:
   override:
     - ant install.antlib 
     - ant instant -Ddb.host=localhost
+    - ant wipe.all
+    - rm  ~/.bibiserv2_manager
+    - ant instant.environment -Ddb.host=localhost
