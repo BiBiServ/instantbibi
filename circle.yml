@@ -1,0 +1,17 @@
+dependencies:
+  pre:
+    - sudo apt-get update; sudo apt-get install gsettings-desktop-schemas
+  override:
+    - mvn --fail-never dependency:go-offline || true
+machine:
+  java:
+    version: oraclejdk8
+  services:
+    - docker
+
+machine:
+  environment:
+    _JAVA_OPTIONS: "-Xmx3024m"
+test:
+  override:
+    - ant instant
