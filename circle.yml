@@ -14,4 +14,4 @@ machine:
     _JAVA_OPTIONS: "-Xmx3024m"
 test:
   override:
-    - ant instant
+    - ant instant -Ddb.host=hostname
