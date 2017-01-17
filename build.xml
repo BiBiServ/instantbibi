@@ -140,7 +140,22 @@
         <antcall target="start"/>
         <antcall target="showconfig"/>
     </target>
-    
+
+    <target name="instant.environment"
+            description="Setup a complete BiBiServ2 environment.">
+        <antcall target=".get"/>
+        <antcall target=".unzip"/>
+        <antcall target=".get.glassfish"/>
+        <antcall target=".unzip.glassfish"/>
+        <antcall target=".get.modules"/>
+        <antcall target=".get.items"/>
+        <antcall target=".create.config"/>
+        <antcall target=".create.domain"/>
+        <antcall target=".add.parts"/>
+        <ant antfile="build.xml" target="start" dir="appserver_config"/>
+        <echo>Bibiserv2 environment created!</echo>
+    </target>
+
     <target name="setup.domain" description="create and configure a new GF new domain">
         
         <antcall target=".get.glassfish"/>
