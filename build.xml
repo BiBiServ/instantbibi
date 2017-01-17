@@ -826,7 +826,7 @@
                 <antcontrib:else>
                     <echo>Download resource @{resource} from @{url}/resources/</echo>
                     <mkdir dir=".cache"/>
-                    <get src="@{url}/@{resource}" dest=".cache/@{dest}"/>
+                    <get src="@{url}" dest=".cache/@{dest}"/>
                 </antcontrib:else>
             </antcontrib:if>
         </sequential>
