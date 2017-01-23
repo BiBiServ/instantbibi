@@ -352,8 +352,14 @@
         <delete dir="bibimainapp" failonerror="no"/>
     </target>
 
+    <target name="generate.github" description="depends on wipe and additional remove all install directories">
+        <ant dir="base" antfile="build.xml" target="generate.github" />
+    </target>
 
-
+    <target name="deploy.github" description="depends on wipe and additional remove all install directories">
+        <antcall target="generate.github"/>
+        <ant dir="${dest}" antfile="build.xml" target="deploy" />
+    </target>
 
     <!-- ######################## create and configure new domain   ########################### -->
 
