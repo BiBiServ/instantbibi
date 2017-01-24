@@ -800,7 +800,11 @@
 
     <target name=".get" >
         <antcall target=".get.base"/>
-        <antcall target=".get.appserver"/>
+        <antcall target=".get.bibimainapp"/>
+    </target>
+
+    <target name=".get.bibimainapp" depends=".get.config,.resources.setting">
+        <checkAndDownload url="${bibimainapp}" dest="bibimainapp.war"/>
     </target>
 
     <target name=".get.base" depends=".get.config,.resources.setting">
