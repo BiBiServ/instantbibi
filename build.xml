@@ -230,9 +230,8 @@
         </copy>
     </target>
 
-    <target name="install.wizard" depends=".config.setting"
+    <target name="install.wizard" depends=".get.wizard, .config.setting"
         description="(re)deploys bibiserv2 wizard, application server must be running.">
-        <checkAndDownload dest="Wizard2011.war" url="${bibiserv_url}/resources/Wizard2011.war"/>
         <exec executable="${basedir}/glassfish/bin/asadmin" failifexecutionfails="true"
             failonerror="true">
             <arg value="--user=admin"/>
@@ -242,7 +241,7 @@
             <arg value="deploy"/>
             <arg value="--force"/>
             <arg value="--contextroot=/wizard"/>
-            <arg value=".cache/Wizard2011.war"/>
+            <arg value=".cache/wizard.war"/>
         </exec>
     </target>
 
@@ -811,12 +810,12 @@
         <checkAndDownload url="${bibiserv_url}/resources/base.zip" dest="base.zip"/>
     </target>
 
-    <target name=".get.appserver" depends=".get.config,.resources.setting">
+    <target name=".get.config" depends=".resources.setting">
         <checkAndDownload url="${server_config}"  dest="appserver_config.zip"/>
     </target>
 
-    <target name=".get.config" depends=".resources.setting">
-        <checkAndDownload url="${server_config}"  dest="appserver_config.zip"/>
+    <target name=".get.wizard" depends=".resources.setting">
+        <checkAndDownload url="${wizard}"  dest="wizard.war"/>
     </target>
 
     <target name=".get.glassfish">
