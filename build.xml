@@ -352,8 +352,32 @@
         <delete dir="bibimainapp" failonerror="no"/>
     </target>
 
+    <target name="generate.github" description="Generate new project from github sources. Must contain runnableitem.xml in the root directory." >
+        <fail unless="url">Please provide the Github url with -Durl=... </fail>
+        <property name="release" value="master" />
+        <fail unless="dest">Please provide the destination project directory with -Ddest=... </fail>
+        <mkdir dir="${dest}/download"/>
+        <get src="${url}/archive/${release}.zip" dest="${dest}/download"/>
+        <unzip src="${dest}/download/${release}.zip" dest="${dest}/download">
+            <cutdirsmapper dirs="1" />
+        </unzip>
+        <ant  dir="base" antfile="build.xml" target="generate" >
+            <property name="xml" value="${dest}/download/runnableitem.xml"/>
+            <property name="project_dir" value="${dest}"/>
+        </ant>
+        <delete dir="${dest}/download"/>
+    </target>
 
-
+    <target name="deploy.github" description="depends on wipe and additional remove all install directories">
+        <antcall target="generate.github">
+            <param name="xml" value="${dest}/download/runnableitem.xml"/>
+            <param name="project_dir" value="${dest}"/>
+        </antcall>
+        <ant  dir="${dest}" antfile="build.xml" target="deploy" >
+            <property name="dir" value="${dest}/download/runnableitem.xml"/>
+            <property name="project_dir" value="${dest}"/>
+        </ant>
+    </target>
 
     <!-- ######################## create and configure new domain   ########################### -->
 
@@ -773,11 +797,24 @@
     </macrodef>
 
     <!-- ######################## targets to download sources from server ########################### -->
-    <target name=".get" depends=".get.config,.resources.setting">
+
+    <target name=".get" >
+        <antcall target=".get.base"/>
+        <antcall target=".get.bibimainapp"/>
+    </target>
+
+    <target name=".get.bibimainapp" depends=".get.config,.resources.setting">
         <checkAndDownload url="${bibimainapp}" dest="bibimainapp.war"/>
+    </target>
+
+    <target name=".get.base" depends=".get.config,.resources.setting">
         <checkAndDownload url="${bibiserv_url}/resources/base.zip" dest="base.zip"/>
     </target>
-    
+
+    <target name=".get.appserver" depends=".get.config,.resources.setting">
+        <checkAndDownload url="${server_config}"  dest="appserver_config.zip"/>
+    </target>
+
     <target name=".get.config" depends=".resources.setting">
         <checkAndDownload url="${server_config}"  dest="appserver_config.zip"/>
     </target>
