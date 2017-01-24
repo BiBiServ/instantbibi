@@ -20,3 +20,4 @@ test:
     - rm  ~/.bibiserv2_manager
     - ant instant -Ddb.host=localhost
     - ant deploy.github -Durl=https://github.com/BiBiServ/dialign-docker -Drelease=master -Ddest=/tmp/test
+    - ant install.wizard
