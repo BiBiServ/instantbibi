@@ -249,6 +249,8 @@
         description="undeploy bibiserv2 wizard">
         <exec executable="${basedir}/glassfish/bin/asadmin" failifexecutionfails="true"
             failonerror="true">
+            <arg value="--user=admin"/>
+            <arg value="--passwordfile=appserver_config/local.passwordfile"/>
             <arg value="--port=${admin.port}"/>
             <arg value="--host=localhost"/>
             <arg value="undeploy"/>
@@ -259,6 +261,8 @@
     <target name="undeploy" depends=".config.setting" description="undeploy bibimainapp">
         <exec executable="${basedir}/glassfish/bin/asadmin" failifexecutionfails="true"
             failonerror="true">
+            <arg value="--user=admin"/>
+            <arg value="--passwordfile=appserver_config/local.passwordfile"/>
             <arg value="--port=${admin.port}"/>
             <arg value="--host=localhost"/>
             <arg value="undeploy"/>
@@ -360,6 +364,15 @@
         <unzip src="${dest}/download/${release}.zip" dest="${dest}/download">
             <cutdirsmapper dirs="1" />
         </unzip>
+
+        <fail message="Could not find runnableitem.xml in repository root.">
+            <condition>
+                <not>
+                    <available file="${dest}/download/runnableitem.xml"/>
+                </not>
+            </condition>
+        </fail>
+
         <ant  dir="base" antfile="build.xml" target="generate" >
             <property name="xml" value="${dest}/download/runnableitem.xml"/>
             <property name="project_dir" value="${dest}"/>
