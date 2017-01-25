@@ -175,6 +175,65 @@
         <antcall target="showconfig"/>
     </target>
 
+    <target name=".docker.login">
+        <property name="docker.url" value=""/>
+
+        <input message="Please enter your dockerHub username:" addproperty="docker.username"/>
+        <input message="Please enter your dockerHub password:" addproperty="docker.password">
+            <handler classname="org.apache.tools.ant.input.SecureInputHandler" />
+        </input>
+        <input message="Please enter your dockerHub Organization where the images should be pushed:" addproperty="docker.organization"/>
+        <exec executable="docker" failifexecutionfails="true" failonerror="true">
+            <arg value="login"/>
+            <arg value="--username"/>
+            <arg value="${docker.username}"/>
+            <arg value="--password"/>
+            <arg value="${docker.password}"/>
+            <arg value="${docker.url}"/>
+        </exec>
+    </target>
+
+    <target name=".docker.image.info">
+        <xmlproperty file="${dest}/download/runnableitem.xml"/>
+        <property name="docker.image" value="${ns4:runnableItem.ns4:executable.ns4:execInfo.ns4:image}"/>
+        <property name="docker.version" value="${ns4:runnableItem.ns4:executable.ns4:version}"/>
+    </target>
+
+    <target name=".docker.build" depends=".docker.image.info, .docker.login">
+        <property name="dockerfileDir" value="${dest}/download"/>
+        <fail message="Could not find a Dockerfile in the provided directory ${dockerfileDir}">
+            <condition>
+                <not>
+                    <available file="${dockerfileDir}"/>
+                </not>
+            </condition>
+        </fail>
+        <property name="imageName" value="${docker.organization}/${docker.image}:${docker.version}" />
+        <exec executable="docker"  failifexecutionfails="true" failonerror="true">
+            <arg value="build"/>
+            <arg value="--tag"/>
+            <arg value="${docker.organization}/${docker.image}:${docker.version}"/>
+            <arg value="${dockerfileDir}"/>
+        </exec>
+    </target>
+
+    <target name=".docker.push" depends=".docker.image.info">
+        <property name="imageName" value=""/>
+        <exec executable="docker"  failifexecutionfails="true" failonerror="true">
+            <arg value="push"/>
+            <arg value="${imageName}"/>
+        </exec>
+    </target>
+
+    <target name="deploy.docker" description="rebuilds domain using previous configuration (if exists), depends on wipe.light">
+        <antcall target="deploy.github"/>
+        <antcontrib:antcallback target=".docker.build" return="imageName" />
+        <antcall target=".docker.push">
+            <param name="imageName" value="${imageName}"/>
+        </antcall>
+        <delete dir="${dest}/download"/>
+    </target>
+
     <target name="update.dev"
         description="updates appserver_config, bibimainapp, base from mercurial"
         depends=".mercurial"/>
@@ -364,12 +423,12 @@
             <property name="xml" value="${dest}/download/runnableitem.xml"/>
             <property name="project_dir" value="${dest}"/>
         </ant>
-        <delete dir="${dest}/download"/>
     </target>
 
-    <target name="deploy.github" description="depends on wipe and additional remove all install directories">
+    <target name="deploy.github" description="Deploys a tool hosted by Github on the bibiserv">
+        <property name="xml" value="${dest}/download/runnableitem.xml"/>
         <antcall target="generate.github">
-            <param name="xml" value="${dest}/download/runnableitem.xml"/>
+            <param name="xml" value="${xml}"/>
             <param name="project_dir" value="${dest}"/>
         </antcall>
         <ant  dir="${dest}" antfile="build.xml" target="deploy" >
@@ -585,12 +644,6 @@
                 <fail>Port(s) already in use ...</fail>
             </antcontrib:then>
         </antcontrib:if>
-        
-        
-        
-            
-            
-        
     </target>
 
     <target name=".create.bibimainapp.pwfile" depends=".config.setting">
@@ -626,6 +679,12 @@
                     <entry key="server" value="${db.host}"/>
                     <!-- this is ok since db.host == domain.host -->
                     <entry key="ssl" value="true"/>
+
+                    <!-- docker configuration -->
+                    <entry key="docker.username" value="${docker.username}"/>
+                    <entry key="docker.password" value="${docker.password}"/>
+                    <entry key="docker.url" value="${docker.url}"/>
+                    <entry key="docker.organization" value="${docker.organization}"/>
                 </propertyfile>
             </antcontrib:then>
         </antcontrib:if>
