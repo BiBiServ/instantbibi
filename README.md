@@ -14,6 +14,8 @@ InstantBiBi is a configuration tool to set up a complete BiBiServ2 environment.
 
 * docker (If you are an administrator)
 
+* maven (If you are an administrator)
+
 ## How to use
 
 Before you run any commands, please run

@@ -432,11 +432,33 @@
             </condition>
         </fail>
 
-        <ant  dir="base" antfile="build.xml" target="generate" >
-            <property name="xml" value="${dest}/download/runnableitem.xml"/>
-            <property name="project_dir" value="${dest}"/>
-        </ant>
+        <antcall target=".generate"/>
     </target>
+
+    <target name=".generate" description="Deploys a tool on the bibiserv">
+        <property name="xml" value="${dest}/download/runnableitem.xml"/>
+
+        <exec  executable="java" failifexecutionfails="true"
+              failonerror="true">
+            <arg value="-jar"/>
+            <arg value=".cache/codegen.jar"/>
+            <arg value="-g"/>
+            <arg value="${dest}/download/runnableitem.xml"/>
+            <arg value="-p"/>
+            <arg value="${dest}"/>
+        </exec>
+    </target>
+
+
+    <target name=".deploy" description="Deploys a tool on the bibiserv">
+        <exec executable="mvn" failifexecutionfails="true"
+              failonerror="true">
+            <arg value="package"/>
+            <arg value="-f"/>
+            <arg value="${dest}/pom.xml"/>
+        </exec>
+    </target>
+
 
     <target name="deploy.github" description="Deploys a tool hosted by Github on the bibiserv">
         <property name="xml" value="${dest}/download/runnableitem.xml"/>
@@ -444,10 +466,7 @@
             <param name="xml" value="${xml}"/>
             <param name="project_dir" value="${dest}"/>
         </antcall>
-        <ant  dir="${dest}" antfile="build.xml" target="deploy" >
-            <property name="dir" value="${dest}/download/runnableitem.xml"/>
-            <property name="project_dir" value="${dest}"/>
-        </ant>
+        <antcall target=".deploy"/>
     </target>
 
     <!-- ######################## create and configure new domain   ########################### -->
@@ -864,7 +883,7 @@
     <!-- ######################## targets to download sources from server ########################### -->
 
     <target name=".get" >
-        <antcall target=".get.base"/>
+        <antcall target=".get.codegen"/>
         <antcall target=".get.bibimainapp"/>
     </target>
 
@@ -872,12 +891,13 @@
         <checkAndDownload url="${bibimainapp}" dest="bibimainapp.war"/>
     </target>
 
-    <target name=".get.base" depends=".get.config,.resources.setting">
-        <checkAndDownload url="${bibiserv_url}/resources/base.zip" dest="base.zip"/>
-    </target>
-
     <target name=".get.config" depends=".resources.setting">
         <checkAndDownload url="${server_config}"  dest="appserver_config.zip"/>
+    </target>
+
+    <target name=".get.codegen" depends=".resources.setting">
+        <checkAndDownload url="${codegen}"  dest="codegen.jar"/>
+        <chmod file=".cache/codegen.jar" perm="770"/>
     </target>
 
     <target name=".get.wizard" depends=".resources.setting">
@@ -941,7 +961,7 @@
                     <echo>Resource is already downloaded</echo>
                 </antcontrib:then>
                 <antcontrib:else>
-                    <echo>Download resource @{resource} from @{url}/resources/</echo>
+                    <echo>Download resource from ${url}</echo>
                     <mkdir dir=".cache"/>
                     <get src="@{url}" dest=".cache/@{dest}"/>
                 </antcontrib:else>
