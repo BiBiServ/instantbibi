@@ -71,6 +71,10 @@ to deploy your application. This command will automatically fetch a glassfish
 and deploy the bibimainapp. You can view the start page on localhost:8080.
 It will create the bibidomain in /tmp/${user.name}.
 
+The default admin credentials are **testadmin** and **simplepassword**
+When you have logged in you can change the BiBiTools properties which defines for example the Docker Hub Organisation that
+is used for the deployed tools. 
+
 ###### Options
 
 * -Dbase.dir=<dir> lets you change the default domain directory. Default: /tmp/${user.name}
