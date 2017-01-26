@@ -692,12 +692,6 @@
                     <entry key="server" value="${db.host}"/>
                     <!-- this is ok since db.host == domain.host -->
                     <entry key="ssl" value="true"/>
-
-                    <!-- docker configuration -->
-                    <entry key="docker.username" value="${docker.username}"/>
-                    <entry key="docker.password" value="${docker.password}"/>
-                    <entry key="docker.url" value="${docker.url}"/>
-                    <entry key="docker.organization" value="${docker.organization}"/>
                 </propertyfile>
             </antcontrib:then>
         </antcontrib:if>
