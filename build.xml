@@ -115,7 +115,7 @@
     <target name="instant"
         description="create/configure GF, deploys bibimainapp using stable resources">
         <antcall target=".get"/>
-        <antcall target=".unzip"/>
+        <antcall target=".unzip.config"/>
         <antcall target=".get.glassfish"/>
         <antcall target=".unzip.glassfish"/>
         <antcall target=".get.modules"/>
@@ -144,7 +144,7 @@
     <target name="instant.environment"
             description="Setup a complete BiBiServ2 environment.">
         <antcall target=".get"/>
-        <antcall target=".unzip"/>
+        <antcall target=".unzip.config"/>
         <antcall target=".get.glassfish"/>
         <antcall target=".unzip.glassfish"/>
         <antcall target=".get.modules"/>
@@ -816,12 +816,6 @@
 
 
     <!-- ######################## unzip downloaded sources  ########################### -->
-
-    <target name=".unzip" depends=".unzip.config">
-        
-        <!-- base -->
-        <unzipResource resource=".cache/base.zip" depdir="base"/>
-    </target>
 
     <target name=".unzip.config">
         <!-- appserver config -->
