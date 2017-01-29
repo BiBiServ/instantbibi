@@ -435,7 +435,7 @@
         <antcall target=".generate"/>
     </target>
 
-    <target name=".generate" description="Deploys a tool on the bibiserv">
+    <target name=".generate" description="Generate a new project">
         <property name="xml" value="${dest}/download/runnableitem.xml"/>
 
         <exec  executable="java" failifexecutionfails="true"
@@ -966,8 +966,10 @@
     <!-- ######################## help ########################### -->
     <target name="help" description="print out a help message (same as ant -p)">
         <echo>Main targets: 
-            deploy              (re)deploys bibimainapp 
+            deploy              (re)deploys bibimainapp
             deploy.app          deploy an application from repository on server (-Dapp=ID_OF_APP)
+            deploy.docker       deploy bibiserv tool hosted on github (-Durl=github-url) (-Drelease=release) (-Ddest=destination-path).
+                                The repository must contain a dockerfile
             undeploy.app        undeploy any application from server (-Dapp=ID_OF_APP)
             
             help                print out a help message (same as ant -p) 
@@ -975,18 +977,15 @@
             install.antlib      install needed ant libraries to ${user.home}/.ant/lib - mandatory
                                 for developer 
             install.resource    install instantbibi as resource on bibiserv, could only be run with developer version
-                                from mercurial repository 
+                                from mercurial repository
             install.wizard      (re)deploys the bibiserv2 wizard on glassfish
-            instant             create/configure GF, deploys bibimainapp using stable resources 
-            instant.dev         setup a complete BiBiServ2 environment using latest developer resources from mercurial
-                                repository! 
-            
+            instant             create/configure GF, deploys bibimainapp using stable resources
+            instant.environment set up the bibiserv environment without starting the bibimainapp
             list.apps           list all available apps located in bibiserv repository
-                                
+
             showconfig          shows current configuration start start glassfish/database and
                                 deploys bibimainapp stop stops glassfish and database 
-            update.dev          updates appserver_config, bibimainapp, base from mercurial 
-            wipe                stops GF and clean up domain including spool and exec dir! 
+            wipe                stops GF and clean up domain including spool and exec dir!
             wipe.all            depends on wipe and remove install directories
             
             Default target: help 
@@ -1006,8 +1005,6 @@
             admin.port          | administration port                           | 8048 comment : $${portbase} + 48 
                                 |                                               |
             glassfish3          | use GF3.1.2 instead of 4                      | unset 
-            enable.docker       | enables docker (recommend for linux only)     | unset
-                                | Needs an installed and configured docker environment !         
             config.64           | enables 64Bit support                         | unset
                                 | Needs an 64 Bit capable OS/JVM !
             config.oge          | enables OGE support                           | unset
@@ -1016,7 +1013,6 @@
              + drmaa.jar        | points to a drmaa Java library fitting for installed  OGE
              + drmaa.library.path | points to  drmaa library path, where OGE shared objects are installed
                                 |                                               |
-            enable.ritc         | enables RunInTheCloud support                 | unset
             use.min.module.set  | use minimal module set                        | unset
             
             Example : ant -Dportbase=9000 -Dbase.dir=/vol/bibiserv2

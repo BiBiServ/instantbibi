@@ -127,8 +127,6 @@ If you want to skip the docker step, you can run 'ant deploy.github' with the sa
 
 ##### Inspect the configuration of your service.
 
-You can view the configuration with 
-
 ~~~BASH
 ant showconfig
 ~~~
@@ -136,16 +134,25 @@ ant showconfig
 
 ##### Undeploy a tool of your service.
 
-You can undeploy your tool with 
-
 ~~~BASH
 ant undeploy.app -Dapp=<toolname>
 ~~~
 
+##### Stop or Start your service
 
-##### Uninstall your service installation
+Start:
 
-You can undeploy your installation with 
+~~~BASH
+ant start
+~~~
+
+Stop:
+
+~~~BASH
+ant stop
+~~~
+
+##### Remove your service installation and all configuration files 
 
 ~~~BASH
 ant wipe.all
