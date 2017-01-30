@@ -12,9 +12,9 @@ InstantBiBi is a configuration tool to set up a complete BiBiServ2 environment.
 
 * Java 8
 
-* docker (If you are an administrator)
+* docker >= 1.12 (If you are an administrator)
 
-* maven (If you are an administrator)
+* maven >= 3.3.9 (If you are an administrator)
 
 ## How to use
 
