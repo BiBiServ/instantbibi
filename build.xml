@@ -1015,8 +1015,8 @@
                                 |                                               |
             use.min.module.set  | use minimal module set                        | unset
             
-            Example : ant -Dportbase=9000 -Dbase.dir=/vol/bibiserv2
-            instant Setup a new bibiserv2 instance with port base 9000 (-> http:9080, https:9081,
+            Example : ant instant -Dportbase=9000 -Dbase.dir=/vol/bibiserv2
+            Setup a new bibiserv2 instance with port base 9000 (-> http:9080, https:9081,
             admin:9048, db:9027) and /vol/bibiserv2 as base dir. </echo>
     </target>
 
