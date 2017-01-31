@@ -26,7 +26,7 @@
 
 
 <project name="instantbibi" basedir="." default="help" xmlns:antcontrib="antlib:net.sf.antcontrib"
-    xmlns:ivy="antlib:org.apache.ivy.ant">
+         xmlns:ivy="antlib:org.apache.ivy.ant">
 
     <!-- load antlib for ant-contrib and ivy -->
 
@@ -37,34 +37,33 @@
     </path>
 
     <taskdef uri="antlib:net.sf.antcontrib" resource="net/sf/antcontrib/antlib.xml"
-        classpathref="antlib"/>
+             classpathref="antlib"/>
 
     <taskdef uri="antlib:org.apache.ivy.ant" resource="org/apache/ivy/ant/antlib.xml"
-        classpathref="antlib"/>
-
+             classpathref="antlib"/>
 
 
     <!-- getting access to environment vars -->
     <property environment="env"/>
 
+
     <!--  build conditions/dependencies -->
 
     <fail
-        message="At least Java 7 is needed to compile '${ant.project.name}'. You are running ${java.version}, ${java.specification.version}, ${java.specification.name}">
+            message="At least Java 7 is needed to compile '${ant.project.name}'. You are running ${java.version}, ${java.specification.version}, ${java.specification.name}">
         <condition>
             <not>
                 <or>
                     <!-- any Java 7 release is supported -->
                     <equals arg1="${java.specification.version}" arg2="1.7" trim="yes"
-                        casesensitive="no"/>
+                            casesensitive="no"/>
                     <!-- upcoming Java 8 release also supported -->
                     <equals arg1="${java.specification.version}" arg2="1.8" trim="yes"
-                        casesensitive="no"/>
+                            casesensitive="no"/>
                 </or>
             </not>
         </condition>
     </fail>
-
 
 
     <!-- following properties can be overwritten calling ant with -Dpropertyname=propertyvalue -->
@@ -113,7 +112,8 @@
     </target>
 
     <target name="instant"
-        description="create/configure GF, deploys bibimainapp using stable resources">
+            depends="proxy"
+            description="create/configure GF, deploys bibimainapp using stable resources">
         <antcall target=".get"/>
         <antcall target=".unzip.config"/>
         <antcall target=".get.glassfish"/>
@@ -128,7 +128,8 @@
     </target>
 
     <target name="instant.dev"
-        description="setup a complete BiBiServ2 environment using latest developer resources from mercurial repository!">
+            depends="proxy"
+            description="setup a complete BiBiServ2 environment using latest developer resources from mercurial repository!">
         <antcall target=".mercurial"/>
         <antcall target=".get.glassfish"/>
         <antcall target=".unzip.glassfish"/>
@@ -142,6 +143,7 @@
     </target>
 
     <target name="instant.environment"
+            depends="proxy"
             description="Setup a complete BiBiServ2 environment.">
         <antcall target=".get"/>
         <antcall target=".unzip.config"/>
@@ -157,7 +159,7 @@
     </target>
 
     <target name="setup.domain" description="create and configure a new GF new domain">
-        
+
         <antcall target=".get.glassfish"/>
         <antcall target=".unzip.glassfish"/>
         <antcall target=".get.config"/>
@@ -168,21 +170,22 @@
     </target>
 
     <target name="rebuild.domain" depends="wipe.domain"
-        description="rebuilds domain using previous configuration (if exists), depends on wipe.light">
+            description="rebuilds domain using previous configuration (if exists), depends on wipe.light">
         <antcall target=".create.domain"/>
         <antcall target=".add.parts"/>
         <antcall target="start"/>
         <antcall target="showconfig"/>
     </target>
 
-    <target name=".docker.login">
+    <target depends="proxy" name=".docker.login">
         <property name="docker.url" value=""/>
 
         <input message="Please enter your dockerHub username:" addproperty="docker.username"/>
         <input message="Please enter your dockerHub password:" addproperty="docker.password">
-            <handler classname="org.apache.tools.ant.input.SecureInputHandler" />
+            <handler classname="org.apache.tools.ant.input.SecureInputHandler"/>
         </input>
-        <input message="Please enter your dockerHub Organization where the images should be pushed:" addproperty="docker.organization"/>
+        <input message="Please enter your dockerHub Organization where the images should be pushed:"
+               addproperty="docker.organization"/>
         <exec executable="docker" failifexecutionfails="true" failonerror="true">
             <arg value="login"/>
             <arg value="--username"/>
@@ -199,7 +202,7 @@
         <property name="docker.version" value="${ns4:runnableItem.ns4:executable.ns4:version}"/>
     </target>
 
-    <target name=".docker.build" depends=".docker.image.info, .docker.login">
+    <target name=".docker.build" depends="proxy, .docker.image.info, .docker.login">
         <property name="dockerfileDir" value="${dest}/download"/>
         <fail message="Could not find a Dockerfile in the provided directory ${dockerfileDir}">
             <condition>
@@ -208,8 +211,8 @@
                 </not>
             </condition>
         </fail>
-        <property name="imageName" value="${docker.organization}/${docker.image}:${docker.version}" />
-        <exec executable="docker"  failifexecutionfails="true" failonerror="true">
+        <property name="imageName" value="${docker.organization}/${docker.image}:${docker.version}"/>
+        <exec executable="docker" failifexecutionfails="true" failonerror="true">
             <arg value="build"/>
             <arg value="--tag"/>
             <arg value="${docker.organization}/${docker.image}:${docker.version}"/>
@@ -219,15 +222,17 @@
 
     <target name=".docker.push" depends=".docker.image.info">
         <property name="imageName" value=""/>
-        <exec executable="docker"  failifexecutionfails="true" failonerror="true">
+        <exec executable="docker" failifexecutionfails="true" failonerror="true">
             <arg value="push"/>
             <arg value="${imageName}"/>
         </exec>
     </target>
 
-    <target name="deploy.docker" description="rebuilds domain using previous configuration (if exists), depends on wipe.light">
+    <target name="deploy.docker"
+            depends="proxy"
+            description="rebuilds domain using previous configuration (if exists), depends on wipe.light">
         <antcall target="deploy.github"/>
-        <antcontrib:antcallback target=".docker.build" return="imageName" />
+        <antcontrib:antcallback target=".docker.build" return="imageName"/>
         <antcall target=".docker.push">
             <param name="imageName" value="${imageName}"/>
         </antcall>
@@ -235,11 +240,12 @@
     </target>
 
     <target name="update.dev"
-        description="updates appserver_config, bibimainapp, base from mercurial"
-        depends=".mercurial"/>
+            description="updates appserver_config, bibimainapp, base from mercurial"
+            depends="proxy,.mercurial"/>
 
     <target name="install.resource"
-        description="install instantbibi as resource on bibiserv, could only be run with developer version from mercurial repository">
+            depends="proxy"
+            description="install instantbibi as resource on bibiserv, could only be run with developer version from mercurial repository">
 
         <available property="is.developer.version" file=".hg/hgrc" value="true"/>
 
@@ -258,9 +264,9 @@
 
                 <!-- check if ${ssh.key} and ${ssh.user} is set -->
                 <fail unless="ssh.user"
-                    message="The Target &lt;install&gt; uses ssh key based authentication. Give the ssh user for ${ssh.host} as property 'ssh.user' as argument to the ant call!"/>
+                      message="The Target &lt;install&gt; uses ssh key based authentication. Give the ssh user for ${ssh.host} as property 'ssh.user' as argument to the ant call!"/>
                 <fail unless="ssh.key"
-                    message="The Target &lt;install&gt; uses ssh key based authentication. Give the location of your private key as property 'ssh.key' and optional a passphrase as property 'ssh.passphrase' as argument to the ant call!"/>
+                      message="The Target &lt;install&gt; uses ssh key based authentication. Give the location of your private key as property 'ssh.key' and optional a passphrase as property 'ssh.passphrase' as argument to the ant call!"/>
 
                 <!-- load ssh specify setting from bibiserv -->
                 <property url="http://bibiserv.techfak.uni-bielefeld.de/ivy-rep/ivy_ssh.properties"/>
@@ -268,31 +274,33 @@
 
                 <!-- copy local ivy-rep to bibiserv using porta.techfak.uni-bielefeld.de -->
                 <scp todir="${ssh.user}@${ssh.host}:${ssh.basedir}/resources"
-                    passphrase="${ssh.passphrase}" keyfile="${ssh.key}">
+                     passphrase="${ssh.passphrase}" keyfile="${ssh.key}">
                     <fileset file="dist/instantbibi.zip"/>
                     <fileset file="dist/instantbibi.zip.md5"/>
                 </scp>
             </antcontrib:then>
             <antcontrib:else>
                 <echo>Target can only be run with developer version from mercurial
-                    repository!</echo>
+                    repository!
+                </echo>
             </antcontrib:else>
         </antcontrib:if>
     </target>
 
 
     <target name="install.antlib"
-        description="install needed ant libraries to ${user.home}/.ant/lib - mandatory for developer">
+            depends="proxy"
+            description="install needed ant libraries to ${user.home}/.ant/lib - mandatory for developer">
         <mkdir dir="${user.home}/.ant/lib"/>
         <copy todir="${user.home}/.ant/lib">
             <fileset dir=".ant/lib" includes="*.jar"/>
         </copy>
     </target>
 
-    <target name="install.wizard" depends=".get.wizard, .config.setting"
-        description="(re)deploys bibiserv2 wizard, application server must be running.">
+    <target name="install.wizard" depends="proxy, .get.wizard, .config.setting"
+            description="(re)deploys bibiserv2 wizard, application server must be running.">
         <exec executable="${basedir}/glassfish/bin/asadmin" failifexecutionfails="true"
-            failonerror="true">
+              failonerror="true">
             <arg value="--user=admin"/>
             <arg value="--passwordfile=appserver_config/local.passwordfile"/>
             <arg value="--port=${admin.port}"/>
@@ -305,9 +313,9 @@
     </target>
 
     <target name="uninstall.wizard" depends=".config.setting"
-        description="undeploy bibiserv2 wizard">
+            description="undeploy bibiserv2 wizard">
         <exec executable="${basedir}/glassfish/bin/asadmin" failifexecutionfails="true"
-            failonerror="true">
+              failonerror="true">
             <arg value="--user=admin"/>
             <arg value="--passwordfile=appserver_config/local.passwordfile"/>
             <arg value="--port=${admin.port}"/>
@@ -317,9 +325,9 @@
         </exec>
     </target>
 
-    <target name="undeploy" depends=".config.setting" description="undeploy bibimainapp">
+    <target name="undeploy" depends="proxy,.config.setting" description="undeploy bibimainapp">
         <exec executable="${basedir}/glassfish/bin/asadmin" failifexecutionfails="true"
-            failonerror="true">
+              failonerror="true">
             <arg value="--user=admin"/>
             <arg value="--passwordfile=appserver_config/local.passwordfile"/>
             <arg value="--port=${admin.port}"/>
@@ -329,6 +337,62 @@
         </exec>
     </target>
 
+    <target name="probe-proxy">
+        <condition property="proxy.enabled">
+            <isset property="env.http_proxy"/>
+        </condition>
+        <antcontrib:if>
+            <isset property="env.http_proxy"/>
+            <antcontrib:then>
+                <antcontrib:if>
+                    <or>
+                        <not>
+                            <isset property="env.http_proxy"/>
+                        </not>
+                        <not>
+                            <isset property="env.https_proxy"/>
+                        </not>
+                        <not>
+                            <isset property="env.no_proxy"/>
+                        </not>
+                    </or>
+                    <antcontrib:then>
+                        <fail message="You must set the following variables when using proxy: no_proxy, http_proxy, https_proxy"/>
+                    </antcontrib:then>
+                </antcontrib:if>
+            </antcontrib:then>
+        </antcontrib:if>
+    </target>
+
+    <target depends="probe-proxy" if="proxy.enabled" name="proxy">
+        <parseProxySetting prefix="http" url="${env.http_proxy}"/>
+        <echo>${httpHost}</echo>
+        <echo>${httpPort}</echo>
+
+        <parseProxySetting prefix="https" url="${env.https_proxy}"/>
+        <echo>${httpsHost}</echo>
+        <echo>${httpsPort}</echo>
+
+        <script language="javascript">
+            var noproxy = project.getProperty('env.no_proxy');
+            project.setProperty('noProxy', noproxy.replace(/,/g,'|'));
+        </script>
+
+        <echo>${noProxy}</echo>
+
+        <setproxy proxyhost="${httpsHost}" proxyport="${httpsPort}"
+                  nonproxyhosts="${noProxy}"/>
+    </target>
+
+    <scriptdef language="javascript" name="parseProxySetting">
+        <attribute name="url"/>
+        <attribute name="prefix"/>
+        var prefix = attributes.get('prefix'),
+        arr = attributes.get('url').split(':');
+        project.setProperty(prefix + 'Host', arr[1].substr(2));
+        project.setProperty(prefix + 'Port', arr[2]);
+    </scriptdef>
+
     <target name="start" description="start glassfish/database and deploys bibimainapp">
         <ant antfile="build.xml" target="start" dir="appserver_config"/>
         <antcall target="deploy"/>
@@ -336,12 +400,34 @@
     </target>
 
     <target name="deploy" depends=".config.setting" description="(re)deploys bibimainapp">
+
+        <echo>${env.HOME}</echo>
+
+        <!--<exec executable="${basedir}/glassfish/bin/asadmin" failifexecutionfails="true"-->
+        <!--failonerror="true">-->
+        <!--<arg value="&#45;&#45;user=admin"/>-->
+        <!--<arg value="&#45;&#45;passwordfile=appserver_config/local.passwordfile"/>-->
+        <!--<arg value="&#45;&#45;port=${admin.port}"/>-->
+        <!--<arg value="&#45;&#45;host=localhost"/>-->
+        <!--<arg value="create-jvm-options"/>-->
+        <!--<arg value="-Dhttp.proxyHost=proxy.cebitec.uni-bielefeld.de"/>-->
+        <!--</exec>-->
+        <!--<exec executable="${basedir}/glassfish/bin/asadmin" failifexecutionfails="true"-->
+        <!--failonerror="true">-->
+        <!--<arg value="&#45;&#45;user=admin"/>-->
+        <!--<arg value="&#45;&#45;passwordfile=appserver_config/local.passwordfile"/>-->
+        <!--<arg value="&#45;&#45;port=${admin.port}"/>-->
+        <!--<arg value="&#45;&#45;host=localhost"/>-->
+        <!--<arg value="create-jvm-options"/>-->
+        <!--<arg value="-Dhttp.proxyPort=3128"/>-->
+        <!--</exec>-->
+
         <antcontrib:if>
             <available file="bibimainapp"/>
             <antcontrib:then>
                 <ant antfile="build.xml" target="dist" dir="bibimainapp"/>
                 <exec executable="${basedir}/glassfish/bin/asadmin" failifexecutionfails="true"
-                    failonerror="true">
+                      failonerror="true">
                     <arg value="--user=admin"/>
                     <arg value="--passwordfile=appserver_config/local.passwordfile"/>
                     <arg value="--port=${admin.port}"/>
@@ -354,7 +440,7 @@
             </antcontrib:then>
             <antcontrib:else>
                 <exec executable="${basedir}/glassfish/bin/asadmin" failifexecutionfails="true"
-                    failonerror="true">
+                      failonerror="true">
                     <arg value="--user=admin"/>
                     <arg value="--passwordfile=appserver_config/local.passwordfile"/>
                     <arg value="--port=${admin.port}"/>
@@ -390,7 +476,7 @@
     </target>
 
     <target name="wipe.domain" depends=".config.setting, stop"
-        description="stops GF and clean up domain including spool and exec dir">
+            description="stops GF and clean up domain including spool and exec dir">
         <delete dir="${spool.dir}"/>
         <!-- <delete dir="${exec.dir}"/> -->
         <delete dir="${base.dir}/bibidomain"/>
@@ -399,14 +485,14 @@
 
 
     <target name="wipe" depends="wipe.domain"
-        description="depends on wipe.domain and additional clean up domain configuration!">
+            description="depends on wipe.domain and additional clean up domain configuration!">
         <delete dir="lib"/>
         <delete dir="." includes=".tmp.*/**"/>
         <delete file="instant.config"/>
     </target>
 
     <target name="wipe.all" depends="wipe"
-        description="depends on wipe and additional remove all install directories">
+            description="depends on wipe and additional remove all install directories">
         <delete dir="appserver_config"/>
         <delete dir="glassfish"/>
         <delete dir="base"/>
@@ -414,14 +500,16 @@
         <delete dir="bibimainapp" failonerror="no"/>
     </target>
 
-    <target name="generate.github" description="Generate new project from github sources. Must contain runnableitem.xml in the root directory." >
-        <fail unless="url">Please provide the Github url with -Durl=... </fail>
-        <property name="release" value="master" />
-        <fail unless="dest">Please provide the destination project directory with -Ddest=... </fail>
+    <target name="generate.github"
+            depends="proxy"
+            description="Generate new project from github sources. Must contain runnableitem.xml in the root directory.">
+        <fail unless="url">Please provide the Github url with -Durl=...</fail>
+        <property name="release" value="master"/>
+        <fail unless="dest">Please provide the destination project directory with -Ddest=...</fail>
         <mkdir dir="${dest}/download"/>
         <get src="${url}/archive/${release}.zip" dest="${dest}/download"/>
         <unzip src="${dest}/download/${release}.zip" dest="${dest}/download">
-            <cutdirsmapper dirs="1" />
+            <cutdirsmapper dirs="1"/>
         </unzip>
 
         <fail message="Could not find runnableitem.xml in repository root.">
@@ -435,10 +523,10 @@
         <antcall target=".generate"/>
     </target>
 
-    <target name=".generate" description="Generate a new project">
+    <target depends="proxy" name=".generate" description="Generate a new project">
         <property name="xml" value="${dest}/download/runnableitem.xml"/>
 
-        <exec  executable="java" failifexecutionfails="true"
+        <exec executable="java" failifexecutionfails="true"
               failonerror="true">
             <arg value="-jar"/>
             <arg value=".cache/codegen.jar"/>
@@ -450,7 +538,7 @@
     </target>
 
 
-    <target name=".deploy" description="Deploys a tool on the bibiserv">
+    <target depends="proxy" name=".deploy" description="Deploys a tool on the bibiserv">
         <exec executable="mvn" failifexecutionfails="true"
               failonerror="true">
             <arg value="package"/>
@@ -460,7 +548,7 @@
     </target>
 
 
-    <target name="deploy.github" description="Deploys a tool hosted by Github on the bibiserv">
+    <target depends="proxy" name="deploy.github" description="Deploys a tool hosted by Github on the bibiserv">
         <property name="xml" value="${dest}/download/runnableitem.xml"/>
         <antcall target="generate.github">
             <param name="xml" value="${xml}"/>
@@ -471,7 +559,7 @@
 
     <!-- ######################## create and configure new domain   ########################### -->
 
-    <target name=".add.parts">
+    <target depends="proxy" name=".add.parts">
         <ant antfile="build.xml" target="_start_db" dir="appserver_config">
             <property name="ant.library.path" value="${ant.lib.path}"/>
         </ant>
@@ -485,7 +573,7 @@
         </ant>
     </target>
 
-    <target name=".add.modules">
+    <target depends="proxy" name=".add.modules">
         <loadresource property="modullist">
             <file file=".cache/modules.txt"/>
         </loadresource>
@@ -499,7 +587,7 @@
         </antcontrib:for>
     </target>
 
-    <target name=".add.items">
+    <target depends="proxy" name=".add.items">
         <loadresource property="itemlist">
             <file file=".cache/items.txt"/>
         </loadresource>
@@ -581,7 +669,7 @@
         </antcontrib:if>
     </target>
 
-    <target name=".create.domain" depends=".create.config, .create.bibimainapp.pwfile, .check">
+    <target name=".create.domain" depends="proxy, .create.config, .create.bibimainapp.pwfile, .check">
         <available file="${base.dir}/bibidomain" property="domain.present"/>
         <antcontrib:if>
             <isset property="domain.present"/>
@@ -600,10 +688,10 @@
         <antcontrib:if>
             <not>
                 <available file="appserver_config/local.configuration" property="config.present"
-                    value="true"/>
+                           value="true"/>
             </not>
             <antcontrib:then>
-                <echo>create configuration </echo>
+                <echo>create configuration</echo>
                 <!-- local configuration -->
                 <propertyfile file="appserver_config/local.configuration">
                     <entry key="catalina.home" value="${basedir}/glassfish"/>
@@ -634,7 +722,7 @@
                 <echo>found previous configuration ...</echo>
             </antcontrib:else>
         </antcontrib:if>
-        
+
         <!-- check if all ports available -->
         <antcontrib:if>
             <socket server="localhost" port="${http.port}"/>
@@ -643,7 +731,7 @@
                 <echo>HTTP port (${http.port}) is already in use !</echo>
             </antcontrib:then>
         </antcontrib:if>
-        
+
         <antcontrib:if>
             <socket server="localhost" port="${https.port}"/>
             <antcontrib:then>
@@ -651,7 +739,7 @@
                 <echo>HTTPS port (${https.port}) is already in use !</echo>
             </antcontrib:then>
         </antcontrib:if>
-        
+
         <antcontrib:if>
             <socket server="localhost" port="${admin.port}"/>
             <antcontrib:then>
@@ -659,7 +747,7 @@
                 <echo>ADMIN port (${admin.port}) is already in use !</echo>
             </antcontrib:then>
         </antcontrib:if>
-        
+
         <antcontrib:if>
             <socket server="localhost" port="${db.port}"/>
             <antcontrib:then>
@@ -667,12 +755,14 @@
                 <echo>DB port (${db.port}) is already in use !</echo>
             </antcontrib:then>
         </antcontrib:if>
-        
-        
+
+
         <antcontrib:if>
             <isset property="port_used"/>
             <antcontrib:then>
-                <echo>At least on port (see previous log message) needed by current configuration is in use by another process. Abbort!</echo>
+                <echo>At least on port (see previous log message) needed by current configuration is in use by another
+                    process. Abbort!
+                </echo>
                 <fail>Port(s) already in use ...</fail>
             </antcontrib:then>
         </antcontrib:if>
@@ -686,8 +776,8 @@
             <available file="${user.home}/.bibiserv2_manager"/>
             <antcontrib:then>
                 <input
-                    message="Found previous BiBiServ2 ManagerClient configuration (${user.home}/.bibiserv2_manager)!\nShould this configuration overwritten - previous configuration will be moved to ${user.home)/.bibiserv2_manager.${CURRENT} (y/n)?"
-                    validargs="y,n" addproperty="do.overwrite"/>
+                        message="Found previous BiBiServ2 ManagerClient configuration (${user.home}/.bibiserv2_manager)!\nShould this configuration overwritten - previous configuration will be moved to ${user.home)/.bibiserv2_manager.${CURRENT} (y/n)?"
+                        validargs="y,n" addproperty="do.overwrite"/>
             </antcontrib:then>
         </antcontrib:if>
         <antcontrib:if>
@@ -702,7 +792,7 @@
             </or>
             <antcontrib:then>
                 <move file="${user.home}/.bibiserv2_manager"
-                    tofile="${user.home}/.bibiserv2_manager.${CURRENT}" failonerror="false"/>
+                      tofile="${user.home}/.bibiserv2_manager.${CURRENT}" failonerror="false"/>
                 <propertyfile file="${user.home}/.bibiserv2_manager">
                     <entry key="role" value="testadmin"/>
                     <entry key="password" value="b9dfac81fa1e0516aab7feef882c1f97d13ca2cc"/>
@@ -717,12 +807,11 @@
     </target>
 
 
-
     <target name=".check">
         <antcontrib:if>
             <available file="${base.dir}"/>
             <antcontrib:then>
-                <echo>${base.dir} exist ... </echo>
+                <echo>${base.dir} exist ...</echo>
                 <touch file="${base.dir}/ok"/>
             </antcontrib:then>
             <antcontrib:else>
@@ -754,7 +843,7 @@
 
             </antcontrib:then>
             <antcontrib:else>
-                <echo>Create ${exec.dir} ... </echo>
+                <echo>Create ${exec.dir} ...</echo>
                 <mkdir dir="${exec.dir}"/>
             </antcontrib:else>
         </antcontrib:if>
@@ -765,7 +854,7 @@
                 <touch file="${tool.dir}/ok"/>
             </antcontrib:then>
             <antcontrib:else>
-                <echo>Create ${tool.dir} ... </echo>
+                <echo>Create ${tool.dir} ...</echo>
                 <mkdir dir="${tool.dir}"/>
             </antcontrib:else>
         </antcontrib:if>
@@ -791,11 +880,11 @@
                         <available file="@{project}/.hg"/>
                         <antcontrib:then>
                             <exec executable="hg" dir="@{project}" failifexecutionfails="true"
-                                failonerror="true">
+                                  failonerror="true">
                                 <arg value="pull"/>
                             </exec>
                             <exec executable="hg" dir="@{project}" failifexecutionfails="true"
-                                failonerror="true">
+                                  failonerror="true">
                                 <arg value="update"/>
                             </exec>
                         </antcontrib:then>
@@ -817,12 +906,12 @@
 
     <!-- ######################## unzip downloaded sources  ########################### -->
 
-    <target name=".unzip.config">
+    <target depends="proxy" name=".unzip.config">
         <!-- appserver config -->
         <unzipResource resource=".cache/appserver_config.zip" depdir="appserver_config"/>
     </target>
 
-    <target name=".unzip.glassfish">
+    <target depends="proxy" name=".unzip.glassfish">
         <antcontrib:if>
             <isset property="glassfish3"/>
             <antcontrib:then>
@@ -862,7 +951,7 @@
                 <antcontrib:else>
                     <mkdir dir="@{depdir}"/>
                     <unzip src="@{resource}" dest="@{depdir}">
-                        <cutdirsmapper dirs="1" />
+                        <cutdirsmapper dirs="1"/>
                     </unzip>
                     <move todir="@{depdir}" verbose="true">
                         <fileset dir="@{depdir}">
@@ -876,29 +965,29 @@
 
     <!-- ######################## targets to download sources from server ########################### -->
 
-    <target name=".get" >
+    <target depends="proxy" name=".get">
         <antcall target=".get.codegen"/>
         <antcall target=".get.bibimainapp"/>
     </target>
 
-    <target name=".get.bibimainapp" depends=".get.config,.resources.setting">
+    <target name=".get.bibimainapp" depends="proxy,.get.config,.resources.setting">
         <checkAndDownload url="${bibimainapp}" dest="bibimainapp.war"/>
     </target>
 
-    <target name=".get.config" depends=".resources.setting">
-        <checkAndDownload url="${server_config}"  dest="appserver_config.zip"/>
+    <target name=".get.config" depends="proxy,.resources.setting">
+        <checkAndDownload url="${server_config}" dest="appserver_config.zip"/>
     </target>
 
-    <target name=".get.codegen" depends=".resources.setting">
-        <checkAndDownload url="${codegen}"  dest="codegen.jar"/>
+    <target name=".get.codegen" depends="proxy,.resources.setting">
+        <checkAndDownload url="${codegen}" dest="codegen.jar"/>
         <chmod file=".cache/codegen.jar" perm="770"/>
     </target>
 
-    <target name=".get.wizard" depends=".resources.setting">
-        <checkAndDownload url="${wizard}"  dest="wizard.war"/>
+    <target name=".get.wizard" depends="proxy,.resources.setting">
+        <checkAndDownload url="${wizard}" dest="wizard.war"/>
     </target>
 
-    <target name=".get.glassfish">
+    <target depends="proxy" name=".get.glassfish">
         <antcontrib:if>
             <isset property="glassfish3"/>
             <antcontrib:then>
@@ -910,7 +999,7 @@
         </antcontrib:if>
     </target>
 
-    <target name=".get.modules">
+    <target depends="proxy" name=".get.modules">
         <antcontrib:if>
             <isset property="use.min.module.set"/>
             <antcontrib:then>
@@ -920,7 +1009,7 @@
                 <get src="${bibiserv_url}/resources/modules/modules.txt" dest=".cache/modules.txt"/>
             </antcontrib:else>
         </antcontrib:if>
-        
+
         <loadresource property="modullist">
             <file file=".cache/modules.txt"/>
         </loadresource>
@@ -931,7 +1020,7 @@
             </sequential>
         </antcontrib:for>
     </target>
-    <target name=".get.items">
+    <target depends="proxy" name=".get.items">
         <get src="${bibiserv_url}/resources/items/items.txt" dest=".cache/items.txt"/>
         <loadresource property="itemlist">
             <file file=".cache/items.txt"/>
@@ -945,7 +1034,7 @@
     </target>
 
     <macrodef name="checkAndDownload"
-        description="check if a resource is cached and up to date, otherwise download it from given url">
+              description="check if a resource is cached and up to date, otherwise download it from given url">
         <attribute name="url"/>
         <attribute name="dest"/>
         <sequential>
@@ -965,72 +1054,74 @@
 
     <!-- ######################## help ########################### -->
     <target name="help" description="print out a help message (same as ant -p)">
-        <echo>Main targets: 
-            deploy              (re)deploys bibimainapp
-            deploy.app          deploy an application from repository on server (-Dapp=ID_OF_APP)
-            deploy.docker       deploy bibiserv tool hosted on github (-Durl=github-url) (-Drelease=release) (-Ddest=destination-path).
-                                The repository must contain a dockerfile
-            undeploy.app        undeploy any application from server (-Dapp=ID_OF_APP)
-            
-            help                print out a help message (same as ant -p) 
-            
-            install.antlib      install needed ant libraries to ${user.home}/.ant/lib - mandatory
-                                for developer 
-            install.resource    install instantbibi as resource on bibiserv, could only be run with developer version
-                                from mercurial repository
-            install.wizard      (re)deploys the bibiserv2 wizard on glassfish
-            instant             create/configure GF, deploys bibimainapp using stable resources
-            instant.environment set up the bibiserv environment without starting the bibimainapp
-            list.apps           list all available apps located in bibiserv repository
+        <echo>Main targets:
+            deploy (re)deploys bibimainapp
+            deploy.app deploy an application from repository on server (-Dapp=ID_OF_APP)
+            deploy.docker deploy bibiserv tool hosted on github (-Durl=github-url) (-Drelease=release)
+            (-Ddest=destination-path).
+            The repository must contain a dockerfile
+            undeploy.app undeploy any application from server (-Dapp=ID_OF_APP)
 
-            showconfig          shows current configuration start start glassfish/database and
-                                deploys bibimainapp stop stops glassfish and database 
-            wipe                stops GF and clean up domain including spool and exec dir!
-            wipe.all            depends on wipe and remove install directories
-            
-            Default target: help 
-            
-            Configuration can individualized setting properties, following properties are supported : 
-            
-            name             | description                                   | defaultvalue 
-            bibiserv_url        | BiBiServ resource url                         | ${bibiserv_url} 
-            glassfish_url       | GlassFish resource url                        | ${glassfish_url}
-            base.dir            | base dir                                      | ${base.dir} comment : /tmp/$${user.name} 
-            spool.dir           | spool dir                                     | ${spool.dir} comment : $${base.dir}/spool 
-            exec.dir            | executation dir (for binaries)                | ${exec.dir} comment : $${base.dir}/bin 
-            tool.dir            | generated tool project dir                    | ${tool.dir} comment : $${base.dir}/gentools 
-            portbase            | glassfish port base                           | 8000 
-                                |                                               | (http: +80, https: +81) | 
-            db.port             | database port                                 | 8027 comment : $${portbase} + 27
-            admin.port          | administration port                           | 8048 comment : $${portbase} + 48 
-                                |                                               |
-            glassfish3          | use GF3.1.2 instead of 4                      | unset 
-            config.64           | enables 64Bit support                         | unset
-                                | Needs an 64 Bit capable OS/JVM !
-            config.oge          | enables OGE support                           | unset
-                                | Needs an installed and configured OGE environmet and
-                                | additional  properties set :  drmaa.jar, drmaa.library.path
-             + drmaa.jar        | points to a drmaa Java library fitting for installed  OGE
-             + drmaa.library.path | points to  drmaa library path, where OGE shared objects are installed
-                                |                                               |
-            use.min.module.set  | use minimal module set                        | unset
-            
+            help print out a help message (same as ant -p)
+
+            install.antlib install needed ant libraries to ${user.home}/.ant/lib - mandatory
+            for developer
+            install.resource install instantbibi as resource on bibiserv, could only be run with developer version
+            from mercurial repository
+            install.wizard (re)deploys the bibiserv2 wizard on glassfish
+            instant create/configure GF, deploys bibimainapp using stable resources
+            instant.environment set up the bibiserv environment without starting the bibimainapp
+            list.apps list all available apps located in bibiserv repository
+
+            showconfig shows current configuration start start glassfish/database and
+            deploys bibimainapp stop stops glassfish and database
+            wipe stops GF and clean up domain including spool and exec dir!
+            wipe.all depends on wipe and remove install directories
+
+            Default target: help
+
+            Configuration can individualized setting properties, following properties are supported :
+
+            name | description | defaultvalue
+            bibiserv_url | BiBiServ resource url | ${bibiserv_url}
+            glassfish_url | GlassFish resource url | ${glassfish_url}
+            base.dir | base dir | ${base.dir} comment : /tmp/$${user.name}
+            spool.dir | spool dir | ${spool.dir} comment : $${base.dir}/spool
+            exec.dir | executation dir (for binaries) | ${exec.dir} comment : $${base.dir}/bin
+            tool.dir | generated tool project dir | ${tool.dir} comment : $${base.dir}/gentools
+            portbase | glassfish port base | 8000
+            | | (http: +80, https: +81) |
+            db.port | database port | 8027 comment : $${portbase} + 27
+            admin.port | administration port | 8048 comment : $${portbase} + 48
+            | |
+            glassfish3 | use GF3.1.2 instead of 4 | unset
+            config.64 | enables 64Bit support | unset
+            | Needs an 64 Bit capable OS/JVM !
+            config.oge | enables OGE support | unset
+            | Needs an installed and configured OGE environmet and
+            | additional properties set : drmaa.jar, drmaa.library.path
+            + drmaa.jar | points to a drmaa Java library fitting for installed OGE
+            + drmaa.library.path | points to drmaa library path, where OGE shared objects are installed
+            | |
+            use.min.module.set | use minimal module set | unset
+
             Example : ant -Dportbase=9000 -Dbase.dir=/vol/bibiserv2
             instant Setup a new bibiserv2 instance with port base 9000 (-> http:9080, https:9081,
-            admin:9048, db:9027) and /vol/bibiserv2 as base dir. </echo>
+            admin:9048, db:9027) and /vol/bibiserv2 as base dir.
+        </echo>
     </target>
 
     <!-- ######################## tools ########################### -->
-    
-    <target name="deploy.app" description="deploy application" depends=".config.setting,.resolve">
-        
-      <fail unless="app">You have to define an application to deploy using -Dapp=APPNAME</fail>
-                
+
+    <target name="deploy.app" description="deploy application" depends="proxy,.config.setting,.resolve">
+
+        <fail unless="app">You have to define an application to deploy using -Dapp=APPNAME</fail>
+
         <mkdir dir=".tmp"/>
         <!-- get bar from server -->
         <get src="${bibiserv_url}/resources/apps/${app}.bar" dest=".tmp"/>
-        
-        
+
+
         <!-- deploy bar archive to server -->
         <java classname="de.unibi.cebitec.bibiserv.client.manager.ManagerClient" fork="true">
             <classpath>
@@ -1041,15 +1132,15 @@
             <arg value="deploy"/>
             <arg value=".tmp/${app}.bar"/>
         </java>
-        
+
         <!-- remove bar -->
         <delete file=".tmp/${app}.bar"/>
     </target>
-    
-    
-    <target name="undeploy.app" description="undeploy an application" depends=".config.setting,.resolve">
+
+
+    <target name="undeploy.app" description="undeploy an application" depends="proxy,.config.setting,.resolve">
         <fail unless="app">You have to define an application to deploy using -Dapp=APPNAME</fail>
-        
+
         <!-- undeploy app from server-->
         <java classname="de.unibi.cebitec.bibiserv.client.manager.ManagerClient" fork="true">
             <classpath>
@@ -1061,19 +1152,19 @@
             <arg value="${app}"/>
         </java>
     </target>
-    
-    
-    <target name="list.apps" description="list all applications available from BiBiServ repository">
+
+
+    <target depends="proxy" name="list.apps" description="list all applications available from BiBiServ repository">
         <mkdir dir=".tmp"/>
         <get src="${bibiserv_url}/resources/apps/" dest=".tmp"/>
         <replaceregexp file=".tmp/apps"
-            match=".+href=&quot;(.+?)\.bar.+"
-            replace="\1"
-            byline="true"
+                       match=".+href=&quot;(.+?)\.bar.+"
+                       replace="\1"
+                       byline="true"
         />
         <loadfile
-            property="list.apps"
-            srcFile=".tmp/apps">
+                property="list.apps"
+                srcFile=".tmp/apps">
             <filterchain>
                 <linecontains negate="true">
                     <contains value="&lt;"/>
@@ -1093,7 +1184,6 @@
         <ivy:settings url="http://bibiserv.techfak.uni-bielefeld.de/ivy-rep/ivysettings.xml"/>
         <ivy:retrieve/>
     </target>
-
 
 
 </project>
