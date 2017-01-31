@@ -955,7 +955,7 @@
                     <echo>Resource is already downloaded</echo>
                 </antcontrib:then>
                 <antcontrib:else>
-                    <echo>Download resource from ${url}</echo>
+                    <echo>Download resource from @{url}</echo>
                     <mkdir dir=".cache"/>
                     <get src="@{url}" dest=".cache/@{dest}"/>
                 </antcontrib:else>
