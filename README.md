@@ -12,9 +12,9 @@ InstantBiBi is a configuration tool to set up a complete BiBiServ2 environment.
 
 * Java 8
 
-* docker (If you are an administrator)
+* docker >= 1.12 (If you are an administrator)
 
-* maven (If you are an administrator)
+* maven >= 3.3.9 (If you are an administrator)
 
 ## How to use
 
@@ -77,13 +77,25 @@ The default admin credentials are **testadmin** and **simplepassword**
 When you have logged in you can change the BiBiTools properties which defines for example the Docker Hub Organisation that
 is used for the deployed tools. 
 
+
+**Note:**
+
+  * If you are behind a proxy you have to configure maven: https://maven.apache.org/guides/mini/guide-proxies.html
+
+  * On production systems you should configure the glassfish instance by accessing localhost:8048 (when using portbase 8000) e.g:
+  
+    * -Xmx
+    
+    * -client
+    
+
 ###### Options
 
 * -Dbase.dir=<dir> lets you change the default domain directory. Default: /tmp/${user.name}
 
 * -Dspool.dir=<dir> defines the work directory for the installed tools. Default: ${base.dir}/spool
 
-* -Dportbase=<port> sets the portbase for the installation. Starting from this port base the following 4 ports used:
+* -Dportbase=<port> sets the portbase for the installation (default:8000). Starting from this port base the following 4 ports used:
 
    * ${portbase} + 80  (http) 
 
@@ -130,7 +142,6 @@ If you want to skip the docker step, you can run 'ant deploy.github' with the sa
 ~~~BASH
 ant showconfig
 ~~~
-
 
 ##### Undeploy a tool of your service.
 
