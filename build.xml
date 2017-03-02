@@ -214,6 +214,12 @@
         <property name="imageName" value="${docker.organization}/${docker.image}:${docker.version}"/>
         <exec executable="docker" failifexecutionfails="true" failonerror="true">
             <arg value="build"/>
+	    <arg value="--build-arg"/>
+	    <arg value="https_proxy=${httpsHost}:${httpsPort}"/>
+	    <arg value="--build-arg"/>
+	    <arg value="http_proxy=${httpHost}:${httpPort}"/>
+	    <arg value="--build-arg"/>
+	    <arg value="no_proxy=${noProxy}"/>
             <arg value="--tag"/>
             <arg value="${docker.organization}/${docker.image}:${docker.version}"/>
             <arg value="${dockerfileDir}"/>
@@ -525,15 +531,17 @@
 
     <target depends="proxy" name=".generate" description="Generate a new project">
         <property name="xml" value="${dest}/download/runnableitem.xml"/>
-
-        <exec executable="java" failifexecutionfails="true"
-              failonerror="true">
-            <arg value="-jar"/>
-            <arg value=".cache/codegen.jar"/>
-            <arg value="-g"/>
-            <arg value="${dest}/download/runnableitem.xml"/>
-            <arg value="-p"/>
-            <arg value="${dest}"/>
+        <exec  executable="java" failifexecutionfails="true"
+                 failonerror="true">
+               <arg value="-jar"/>
+	       <arg value="-Dhttp.proxyHost=${http.proxyHost}"/>
+	       <arg value="-Dhttp.proxyPort=${http.proxyPort}"/>
+	       <arg value="-Dnonproxyhosts=${noProxy}"/>
+               <arg value=".cache/codegen.jar"/>
+               <arg value="-g"/>
+               <arg value="${dest}/download/runnableitem.xml"/>
+               <arg value="-p"/>
+               <arg value="${dest}"/>
         </exec>
     </target>
 
