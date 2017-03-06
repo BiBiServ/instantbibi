@@ -15,13 +15,13 @@ machine:
 test:
   override:
     - ant install.antlib 
-    - ant instant.environment -Ddb.host=localhost
-    - ant wipe.all
-    - rm  ~/.bibiserv2_manager
-    - ant instant -Ddb.host=localhost
-    - ant wipe.all
-    - rm  ~/.bibiserv2_manager
-    - ant instant -Ddb.host=localhost &&  ant deploy.github -Durl=https://github.com/BiBiServ/dialign-docker -Drelease=master -Ddest=/tmp/test && ant undeploy.app -Dapp=dialign  && ant undeploy
-    - ant wipe.all
-    - rm  ~/.bibiserv2_manager
-    - ant instant -Ddb.host=localhost && ant install.wizard && ant uninstall.wizard
+      #    - ant instant.environment -Ddb.host=localhost
+      # - ant wipe.all
+      #- rm  ~/.bibiserv2_manager
+      #- ant instant -Ddb.host=localhost
+      #- ant wipe.all
+      #- rm  ~/.bibiserv2_manager
+      #- ant instant -Ddb.host=localhost &&  ant deploy.github -Durl=https://github.com/BiBiServ/dialign-docker -Drelease=master -Ddest=/tmp/test && ant undeploy.app -Dapp=dialign  && ant undeploy
+      #- ant wipe.all
+      #- rm  ~/.bibiserv2_manager
+      #- ant instant -Ddb.host=localhost && ant install.wizard && ant uninstall.wizard
