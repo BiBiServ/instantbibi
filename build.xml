@@ -212,24 +212,38 @@
             </condition>
         </fail>
         <property name="imageName" value="${docker.organization}/${docker.image}:${docker.version}"/>
-	<antcontrib:if>
-	    <isset property="${http.proxyHost}"/>
-	    <antcontrib:then>
+        <antcontrib:if>
+            <or>
+                <equals arg1="${httpHost}" arg2=""/>
+                <not>
+                    <isset property="${httpHost}"/>
+                </not>
+            </or>
+            <antcontrib:then>
+                <antcontrib:if>
+                    <contains string="${httpHost}" substring="http"/>
+                    <antcontrib:then>
+                    </antcontrib:then>
+                    <antcontrib:else>
+                        <property name="dockerProxyHttpHost" value="http://${httpHost}"/>
+                        <property name="dockerProxyHttpsHost" value="https://${httpsHost}"/>
+                    </antcontrib:else>
+                </antcontrib:if>
                 <exec executable="docker" failifexecutionfails="true" failonerror="true">
-                  <arg value="build"/>
-	          <arg value="--build-arg"/>
-                  <arg value="https_proxy=${httpsHost}:${httpsPort}"/>
-                  <arg value="--build-arg"/>
-	          <arg value="http_proxy=${httpHost}:${httpPort}"/>
-	          <arg value="--build-arg"/>
-	          <arg value="no_proxy=${noProxy}"/>
-	          <arg value="--no-cache"/>
-                  <arg value="--tag"/>
-                  <arg value="${docker.organization}/${docker.image}:${docker.version}"/>
-                  <arg value="${dockerfileDir}"/>
+                    <arg value="build"/>
+                    <arg value="--build-arg"/>
+                    <arg value="https_proxy=${dockerProxyHttpsHost}:${httpsPort}"/>
+                    <arg value="--build-arg"/>
+                    <arg value="http_proxy=${dockerProxyHttpHost}:${httpPort}"/>
+                    <arg value="--build-arg"/>
+                    <arg value="no_proxy=${noProxy}"/>
+                    <arg value="--no-cache"/>
+                    <arg value="--tag"/>
+                    <arg value="${docker.organization}/${docker.image}:${docker.version}"/>
+                    <arg value="${dockerfileDir}"/>
                 </exec>
-	    </antcontrib:then>
-	    <antcontrib:else>
+            </antcontrib:then>
+            <antcontrib:else>
 	        <exec executable="docker" failifexecutionfails="true" failonerror="true">
                   <arg value="build"/>
                   <arg value="--no-cache"/>
