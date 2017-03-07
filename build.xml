@@ -223,6 +223,8 @@
                 <antcontrib:if>
                     <contains string="${httpHost}" substring="http"/>
                     <antcontrib:then>
+                        <property name="dockerProxyHttpHost" value="${httpHost}"/>
+                        <property name="dockerProxyHttpsHost" value="${httpsHost}"/>
                     </antcontrib:then>
                     <antcontrib:else>
                         <property name="dockerProxyHttpHost" value="http://${httpHost}"/>
