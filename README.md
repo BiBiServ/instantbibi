@@ -33,7 +33,7 @@ ant install.antlib
 ant instant.environment && ant install.wizard
 ~~~
 
-This command starts the wizard on localhost:8080/wizard.
+This command starts the wizard on http://localhost:8080/wizard/ .
 With the help of the wizard you can create tool description (runnableitem.xml) that 
 you must place in the GitHub repository of your tool.
 Your Github repository must contain a Dockerfile and a runnableitem.xml in the root directory.
